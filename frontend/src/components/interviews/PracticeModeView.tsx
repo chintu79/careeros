@@ -33,6 +33,23 @@ import {
   fetchOpportunities
 } from '../../services/api';
 
+// In-flight dedup for prep-triggered drill creation. React StrictMode mounts
+// the owner twice in development and double user-clicks are possible in production;
+// both funnel into the same freshly-created session until the request settles.
+// Not an API contract: no keys are sent, and every completed interaction remains
+// free to create a new session.
+const inflightPrepDrills = new Map<string, Promise<void>>();
+
+const prepTriggerKey = (trigger: {
+  category: string;
+  question: string;
+  hint: string;
+  company?: string;
+  role?: string;
+  oppId?: number;
+}): string =>
+  [trigger.category, trigger.question, trigger.hint, trigger.company ?? '', trigger.role ?? '', trigger.oppId ?? ''].join('|');
+
 interface PracticeModeViewProps {
   initialPrepTrigger?: {
     category: string;
@@ -159,6 +176,7 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
   const currentSessionRef = useRef(currentSession);
   useEffect(() => {
     currentSessionRef.current = currentSession;
+
   }, [currentSession]);
 
   const loadSessionsList = useCallback(async () => {
@@ -192,22 +210,33 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
     role?: string;
     oppId?: number;
   }) => {
-    try {
-      const newSession = await createPracticeSession({
-        session_title: `${trigger.company || 'Role'} ${trigger.category.toUpperCase()} Drill`,
-        session_type: trigger.category,
-        opportunity_id: trigger.oppId,
-        company_name: trigger.company,
-        role_title: trigger.role
-      });
-      setCurrentSession(newSession);
-      setCurrentQuestionIndex(0);
-      setUserAnswer('');
-      setShowHint(false);
-      setSessions(prev => [newSession, ...prev]);
-    } catch (err) {
-      console.error('Failed to create session from prep trigger', err);
+    const key = prepTriggerKey(trigger);
+    const existing = inflightPrepDrills.get(key);
+    if (existing) {
+      return existing;
     }
+    const p = (async () => {
+      try {
+        const newSession = await createPracticeSession({
+          session_title: `${trigger.company || 'Role'} ${trigger.category.toUpperCase()} Drill`,
+          session_type: trigger.category,
+          opportunity_id: trigger.oppId,
+          company_name: trigger.company,
+          role_title: trigger.role
+        });
+        setCurrentSession(newSession);
+        setCurrentQuestionIndex(0);
+        setUserAnswer('');
+        setShowHint(false);
+        setSessions(prev => [newSession, ...prev]);
+      } catch (err) {
+        console.error('Failed to create session from prep trigger', err);
+      } finally {
+        inflightPrepDrills.delete(key);
+      }
+    })();
+    inflightPrepDrills.set(key, p);
+    return p;
   }, []);
 
   // Handle incoming trigger from InterviewPrepTab

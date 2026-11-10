@@ -489,7 +489,7 @@ export const AssistedApplicationModal: React.FC<AssistedApplicationModalProps> =
 
                 {dossier.selected_resume?.pdf_url && (
                   <a
-                    href={`http://127.0.0.1:8005${dossier.selected_resume.pdf_url}`}
+                    href={dossier.selected_resume.pdf_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-3.5 py-2 rounded-xl bg-dark-800 hover:bg-dark-750 border border-dark-600 text-xs font-semibold text-emerald-400 flex items-center space-x-1.5"

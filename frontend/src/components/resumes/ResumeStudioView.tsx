@@ -58,7 +58,8 @@ import {
   requestResumeOptimization, 
   applyResumeOptimization, 
   fetchOpportunities, 
-  fetchCandidateProfile 
+  fetchCandidateProfile,
+  getAuthToken
 } from '../../services/api';
 
 import { TemplateSelectorModal } from './TemplateSelectorModal';
@@ -77,6 +78,8 @@ export const ResumeStudioView: React.FC = () => {
   const [versions, setVersions] = useState<ResumeVersionItem[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [candidateProfile, setCandidateProfile] = useState<CandidateProfile | null>(null);
+  const [pdfRefresh, setPdfRefresh] = useState(0);
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
 
   // Loading & Action states
   const [loading, setLoading] = useState(true);
@@ -192,6 +195,36 @@ export const ResumeStudioView: React.FC = () => {
     loadInitialData();
   }, [loadVersions, runInlineAudit]);
 
+  const activeResumeId = activeResume?.id;
+
+  // PDF bytes for <iframe>/download: browser media requests cannot carry an
+  // Authorization header, so fetch them with the session token ourselves.
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    if (!activeResumeId) {
+      setPdfObjectUrl(null);
+      return;
+    }
+    const headers: Record<string, string> = {};
+    const token = getAuthToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    fetch(`/api/resumes/${activeResumeId}/pdf`, { headers })
+      .then((res) => (res.ok ? res.blob() : null))
+      .then((blob) => {
+        if (cancelled || !blob) return;
+        objectUrl = URL.createObjectURL(blob);
+        setPdfObjectUrl(objectUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setPdfObjectUrl(null);
+      });
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [activeResumeId, pdfRefresh]);
+
   const handleSelectResume = (r: ResumeDocument) => {
     if (latexDirty && !window.confirm('You have unsaved LaTeX edits. Discard them and switch resumes?')) return;
     setActiveResume(r);
@@ -227,6 +260,7 @@ export const ResumeStudioView: React.FC = () => {
       }
       const res = await compileResumePdf(activeResume.id);
       setActiveResume({ ...activeResume, pdf_path: res.pdf_url, pdf_generated_at: res.generated_at });
+      setPdfRefresh((n) => n + 1);
       runInlineAudit(activeResume.id);
       showNotification(`Compiled via ${res.compiler_used.toUpperCase()}`);
     } catch (err: any) {
@@ -444,7 +478,7 @@ export const ResumeStudioView: React.FC = () => {
     );
   }
 
-  const pdfUrl = activeResume ? `http://127.0.0.1:8005/api/resumes/${activeResume.id}/pdf` : null;
+  const pdfUrl = pdfObjectUrl;
 
   return (
     <div className="space-y-5">

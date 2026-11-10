@@ -13,6 +13,7 @@ import {
 } from '../types';
 
 vi.mock('../services/api', () => ({
+  getAuthToken: vi.fn(() => 'ci-test-token'),
   fetchResumes: vi.fn(),
   fetchMasterResume: vi.fn(),
   createResume: vi.fn(),

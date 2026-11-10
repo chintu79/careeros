@@ -10,9 +10,11 @@ import {
   SkillTaxonomyResponse
 } from "../types";
 
-export const API_BASE = (typeof window !== "undefined" && window.location.port === "5174")
-  ? "/api"
-  : (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8005/api");
+// Same-origin reverse proxy is the only sane default for a shared bundle.
+// Dev: the Vite dev server proxies /api to the local backend (see vite.config.ts).
+// Prod: nginx proxies /api to the backend. VITE_API_BASE_URL overrides for
+// standalone static deployments only.
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const TOKEN_KEY = "careeros_auth_token";
 const ACTIVE_USER_KEY = "careeros_active_user_id";

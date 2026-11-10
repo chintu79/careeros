@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import * as api from '../services/api';
@@ -10,6 +10,7 @@ import { ResumeStudioView } from '../components/resumes/ResumeStudioView';
 import { ApplicationRecord } from '../types';
 
 vi.mock('../services/api', () => ({
+  getAuthToken: vi.fn(() => 'ci-test-token'),
   // Tracker
   fetchApplications: vi.fn(),
   updateApplication: vi.fn(),
@@ -161,6 +162,22 @@ describe('effect dependency regressions (3.0.8)', () => {
     await waitFor(() => expect(api.fetchPracticeSessions).toHaveBeenCalledTimes(1));
     expect(api.createPracticeSession).not.toHaveBeenCalled();
     expect(api.fetchOpportunities).toHaveBeenCalledTimes(1);
+  });
+
+  it('PracticeModeView under StrictMode creates exactly one drill for one trigger', async () => {
+    const onClear = vi.fn();
+    render(
+      <StrictMode>
+        <PracticeModeView
+          initialPrepTrigger={{ category: 'technical', question: 'Q?', hint: 'h', company: 'Stripe', oppId: 101 }}
+          onClearInitialTrigger={onClear}
+        />
+      </StrictMode>
+    );
+    await waitFor(() => expect(mocks.fetchPracticeSessions).toHaveBeenCalled());
+    // StrictMode mounts effects twice in development; the in-flight dedup must
+    // collapse both invocations into a single session creation request.
+    expect(mocks.createPracticeSession).toHaveBeenCalledTimes(1);
   });
 
   it('PracticeModeView with a prep trigger creates exactly one drill and clears the trigger exactly once', async () => {
