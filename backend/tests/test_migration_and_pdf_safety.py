@@ -298,6 +298,7 @@ def test_database_pdf_path_consistency_after_concurrent_compilation():
         db.close()
 
 
+@requires_tectonic
 def test_cleanup_temporary_files_after_success_and_failure():
     """
     7. Verifies that zero temporary staging or compilation files remain in STORAGE_DIR

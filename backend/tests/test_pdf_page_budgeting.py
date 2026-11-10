@@ -225,6 +225,7 @@ def test_two_page_resume_within_budget():
         if os.path.exists(target_tex): os.remove(target_tex)
 
 
+@requires_tectonic
 def test_resume_exceeding_target_page_count():
     """3. Resume targeted for 1 page that spills to 2 pages returns 'warning' with overflow diagnostics."""
     base_name = "test_budget_overflow_target1"
@@ -412,6 +413,7 @@ def test_long_bullet_wrapping():
         if os.path.exists(tex): os.remove(tex)
 
 
+@requires_tectonic
 def test_failed_validation_preserves_valid_pdf():
     """10. Broken compilation preserves existing valid PDF file with identical hash."""
     base_name = "test_budget_preservation_target"
