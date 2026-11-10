@@ -218,14 +218,14 @@ jobs:
           done
           test "$code" = "200" && echo "ready 200 after restart"
       - name: Teardown (remove stack and disposable volume)
+        if: always()
         run: |
           docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml down -v --rmi local --remove-orphans
-          LEFTOVER=$(PGPASSWORD=ci-not-a-secret psql -h 127.0.0.1 -U postgres -tAX -c "SELECT datname FROM pg_database WHERE datname LIKE 'careeros_test_%';")
-          if [ -n "$LEFTOVER" ]; then
-            echo "FAIL: disposable test databases remain: $LEFTOVER"
+          if docker volume ls -q | grep -q careeros-ci; then
+            echo "FAIL: disposable CI volumes remain"
             exit 1
           fi
-          echo "teardown verified: no disposable databases remain"
+          echo "teardown verified: disposable stack and volume removed"
 
   release-gate:
     name: release gate (required, deployment NOT authorized)
