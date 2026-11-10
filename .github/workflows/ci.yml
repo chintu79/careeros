@@ -203,6 +203,11 @@ jobs:
         run: |
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/internal/metrics)" = "404"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/internal/diagnostics)" = "404"
+      - name: Backend container runs as non-root (runtime check)
+        run: |
+          UID=$(docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T backend id -u)
+          echo "backend uid=$UID"
+          test "$UID" != "0"
       - name: Backend logs do not contain credential-shaped values
         run: |
           docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml logs backend --tail=200 > /tmp/careeros-ci-logs.txt
