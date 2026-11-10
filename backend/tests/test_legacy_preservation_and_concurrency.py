@@ -561,6 +561,10 @@ Worker Compilation %d: High throughput test.
 # =========================================================================
 # Test 13: Failed compilation leaving no corrupted files or records
 # =========================================================================
+from backend.tests.helpers_env import requires_tectonic
+
+
+@requires_tectonic
 def test_failed_compilation_leaving_no_corrupted_files_or_records():
     """Broken LaTeX syntax fails compilation, rolls back DB transaction, and leaves no files in STORAGE_DIR."""
     user_id = random.randint(100000, 999999)

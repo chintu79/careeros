@@ -7,6 +7,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi.testclient import TestClient
 import pypdf
 
+from backend.tests.helpers_env import requires_tectonic
+
 from backend.app.main import app
 from backend.app.database import SessionLocal
 from backend.app.core.auth import create_access_token
@@ -200,6 +202,7 @@ def test_one_page_resume_within_budget():
         if os.path.exists(target_tex): os.remove(target_tex)
 
 
+@requires_tectonic
 def test_two_page_resume_within_budget():
     """2. Valid 2-page resume matches target=2 with 'passed' validation status."""
     base_name = "test_budget_2page_target2"

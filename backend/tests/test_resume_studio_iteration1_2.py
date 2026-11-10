@@ -28,6 +28,7 @@ from backend.app.services.ai.task_router import TASK_ROUTING_MAP
 from backend.app.services.global_ai_command_service import execute_consequential_action
 
 from backend.app.core.auth import create_access_token
+from backend.tests.helpers_env import requires_tectonic
 
 client = TestClient(app)
 
@@ -563,6 +564,7 @@ def test_cross_user_opportunity_access_rejected_403():
 # =========================================================================
 # Test 14: Failed tailoring or optimization does not increment versions or modify application links
 # =========================================================================
+@requires_tectonic
 def test_failed_operations_do_not_increment_version_or_modify_links():
     db = SessionLocal()
     try:

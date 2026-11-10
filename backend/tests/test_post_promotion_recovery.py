@@ -33,6 +33,7 @@ from backend.app.services.pdf_layout_validator import (
     TOLERANCE_PT
 )
 from backend.app.services.latex_templates import build_latex_template
+from backend.tests.helpers_env import requires_tectonic
 
 client = TestClient(app)
 
@@ -376,6 +377,7 @@ def test_05_concurrent_successful_compilation_same_resume(clean_db):
 # ===========================================================================
 # Test 6: Concurrent compilation with one failure
 # ===========================================================================
+@requires_tectonic
 def test_06_concurrent_compilation_with_one_failure(clean_db):
     """
     One request succeeds while another encounters a LaTeX syntax failure.

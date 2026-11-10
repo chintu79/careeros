@@ -14,6 +14,7 @@ from backend.app.models.resume import ResumeDocument
 from backend.app.models.resume_version import ResumeVersion
 from backend.app.services.database_migration import run_database_migrations, MIGRATION_ADVISORY_LOCK_ID
 from backend.app.services.latex_compiler import compile_latex, atomic_promote_file, STORAGE_DIR
+from backend.tests.helpers_env import requires_tectonic
 
 client = TestClient(app)
 
@@ -194,6 +195,7 @@ def test_concurrent_compilations_for_same_resume():
             os.remove(target_tex)
 
 
+@requires_tectonic
 def test_failed_compilation_preserves_valid_pdf():
     """
     5. Verifies that a failed compilation leaves any previously valid PDF intact.
