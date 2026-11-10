@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   Download, 
   Sparkles, 
@@ -130,67 +130,67 @@ export const ResumeStudioView: React.FC = () => {
     return latexCode !== activeResume.latex_content;
   }, [latexCode, activeResume]);
 
-  const loadInitialData = async () => {
-    setLoading(true);
-    try {
-      const [resumesRes, tpls, oppsRes, prof] = await Promise.all([
-        fetchResumes({ page_size: 50 }),
-        fetchResumeTemplates().catch(() => []),
-        fetchOpportunities({ page_size: 20 }).catch(() => ({ items: [] })),
-        fetchCandidateProfile().catch(() => null)
-      ]);
-
-      const oppItems = 'items' in oppsRes ? (oppsRes.items || []) : [];
-      setOpportunities(oppItems);
-      setCandidateProfile(prof);
-      setTemplates(tpls);
-
-      const items = resumesRes.items || [];
-      setResumes(items);
-
-      if (items.length > 0) {
-        const master = items.find((r: ResumeDocument) => r.is_master) || items[0];
-        setActiveResume(master);
-        setLatexCode(master.latex_content);
-        loadVersions(master.id);
-        runInlineAudit(master.id);
-      } else {
-        const master = await fetchMasterResume();
-        setResumes([master]);
-        setActiveResume(master);
-        setLatexCode(master.latex_content);
-        loadVersions(master.id);
-        runInlineAudit(master.id);
-      }
-    } catch (err) {
-      console.error(err);
-      showNotification('Error loading Resume Studio data', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadVersions = async (resumeId: number) => {
+  const loadVersions = useCallback(async (resumeId: number) => {
     try {
       const vList = await fetchResumeVersions(resumeId);
       setVersions(vList);
     } catch (err) {
       console.error('Failed to load version history', err);
     }
-  };
+  }, []);
 
-  const runInlineAudit = async (resumeId: number) => {
+  const runInlineAudit = useCallback(async (resumeId: number) => {
     try {
       const report = await auditResumeQuality(resumeId);
       setAuditReport(report);
     } catch (err) {
       console.error('Silent quality check error', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    const loadInitialData = async () => {
+        setLoading(true);
+        try {
+          const [resumesRes, tpls, oppsRes, prof] = await Promise.all([
+            fetchResumes({ page_size: 50 }),
+            fetchResumeTemplates().catch(() => []),
+            fetchOpportunities({ page_size: 20 }).catch(() => ({ items: [] })),
+            fetchCandidateProfile().catch(() => null)
+          ]);
+    
+          const oppItems = 'items' in oppsRes ? (oppsRes.items || []) : [];
+          setOpportunities(oppItems);
+          setCandidateProfile(prof);
+          setTemplates(tpls);
+    
+          const items = resumesRes.items || [];
+          setResumes(items);
+    
+          if (items.length > 0) {
+            const master = items.find((r: ResumeDocument) => r.is_master) || items[0];
+            setActiveResume(master);
+            setLatexCode(master.latex_content);
+            loadVersions(master.id);
+            runInlineAudit(master.id);
+          } else {
+            const master = await fetchMasterResume();
+            setResumes([master]);
+            setActiveResume(master);
+            setLatexCode(master.latex_content);
+            loadVersions(master.id);
+            runInlineAudit(master.id);
+          }
+        } catch (err) {
+          console.error(err);
+          showNotification('Error loading Resume Studio data', 'error');
+        } finally {
+          setLoading(false);
+        }
+    };
+
     loadInitialData();
-  }, []);
+  }, [loadVersions, runInlineAudit]);
 
   const handleSelectResume = (r: ResumeDocument) => {
     if (latexDirty && !window.confirm('You have unsaved LaTeX edits. Discard them and switch resumes?')) return;

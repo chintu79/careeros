@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Bot, 
   Send, 
@@ -62,11 +62,26 @@ export const AIChatAssistantView: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const loadConversations = async () => {
+  const activeConvIdRef = useRef(activeConvId);
+  useEffect(() => {
+    activeConvIdRef.current = activeConvId;
+  }, [activeConvId]);
+
+  const selectConversation = useCallback(async (id: number) => {
+    setActiveConvId(id);
+    try {
+      const detail = await fetchConversationDetail(id);
+      setMessages(detail.messages || []);
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
+
+  const loadConversations = useCallback(async () => {
     try {
       const convs = await fetchConversations();
       setConversations(convs);
-      if (convs.length > 0 && !activeConvId) {
+      if (convs.length > 0 && !activeConvIdRef.current) {
         selectConversation(convs[0].id);
       }
     } catch (err) {
@@ -74,9 +89,9 @@ export const AIChatAssistantView: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectConversation]);
 
-  const loadTopOpportunities = async () => {
+  const loadTopOpportunities = useCallback(async () => {
     try {
       const res = await fetchOpportunities({ page: 1, page_size: 20, sort_by: 'match_score' });
       const items = res.items || [];
@@ -87,22 +102,12 @@ export const AIChatAssistantView: React.FC = () => {
     } catch (err) {
       if ((err as Error)?.name !== 'AbortError') console.error('Failed to load opportunities:', err);
     }
-  };
-
-  const selectConversation = async (id: number) => {
-    setActiveConvId(id);
-    try {
-      const detail = await fetchConversationDetail(id);
-      setMessages(detail.messages || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  }, []);
 
   useEffect(() => {
     loadConversations();
     loadTopOpportunities();
-  }, []);
+  }, [loadConversations, loadTopOpportunities]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

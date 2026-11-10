@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Mail,
   CheckCircle2,
@@ -57,7 +57,7 @@ export const EmailIntelligenceReviewModal: React.FC<EmailIntelligenceReviewModal
   const [rawResult, setRawResult] = useState<any | null>(null);
   const [rawError, setRawError] = useState<string | null>(null);
 
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -83,13 +83,13 @@ export const EmailIntelligenceReviewModal: React.FC<EmailIntelligenceReviewModal
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     if (isOpen && activeTab !== 'raw_test') {
       loadMessages();
     }
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, loadMessages]);
 
   if (!isOpen) return null;
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Play,
   CheckCircle2,
@@ -156,12 +156,17 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
   const [opportunities, setOpportunities] = useState<any[]>([]);
 
   // Load Sessions
-  const loadSessionsList = async () => {
+  const currentSessionRef = useRef(currentSession);
+  useEffect(() => {
+    currentSessionRef.current = currentSession;
+  }, [currentSession]);
+
+  const loadSessionsList = useCallback(async () => {
     setLoadingSessions(true);
     try {
       const res = await fetchPracticeSessions({ page: 1, page_size: 20 });
       setSessions(res.items || []);
-      if (!currentSession && res.items && res.items.length > 0) {
+      if (!currentSessionRef.current && res.items && res.items.length > 0) {
         // Load the most recent session
         const detail = await fetchPracticeSessionDetail(res.items[0].id);
         setCurrentSession(detail);
@@ -172,22 +177,14 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
     } finally {
       setLoadingSessions(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadSessionsList();
     fetchOpportunities({ page: 1, pageSize: 20 }).then(r => setOpportunities(r.items || [])).catch(() => {});
-  }, []);
+  }, [loadSessionsList]);
 
-  // Handle incoming trigger from InterviewPrepTab
-  useEffect(() => {
-    if (initialPrepTrigger) {
-      handleStartFromPrep(initialPrepTrigger);
-      onClearInitialTrigger?.();
-    }
-  }, [initialPrepTrigger]);
-
-  const handleStartFromPrep = async (trigger: {
+  const handleStartFromPrep = useCallback(async (trigger: {
     category: string;
     question: string;
     hint: string;
@@ -207,11 +204,19 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
       setCurrentQuestionIndex(0);
       setUserAnswer('');
       setShowHint(false);
-      setSessions([newSession, ...sessions]);
+      setSessions(prev => [newSession, ...prev]);
     } catch (err) {
       console.error('Failed to create session from prep trigger', err);
     }
-  };
+  }, []);
+
+  // Handle incoming trigger from InterviewPrepTab
+  useEffect(() => {
+    if (initialPrepTrigger) {
+      handleStartFromPrep(initialPrepTrigger);
+      onClearInitialTrigger?.();
+    }
+  }, [initialPrepTrigger, handleStartFromPrep, onClearInitialTrigger]);
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,13 +255,15 @@ export const PracticeModeView: React.FC<PracticeModeViewProps> = ({
 
   const currentQuestion: PracticeQuestionItem | undefined = currentSession?.questions?.[currentQuestionIndex];
 
-  // Update answer box when question index changes
+  // Update answer box when the displayed question object changes (navigation,
+  // session load, or session replacement after evaluation). Identity-based: the
+  // server returns the same text for the same object, so renders stay no-ops.
   useEffect(() => {
     if (currentQuestion) {
       setUserAnswer(currentQuestion.user_answer || '');
       setShowHint(false);
     }
-  }, [currentQuestionIndex, currentSession?.id]);
+  }, [currentQuestion]);
 
   const handleEvaluateCurrent = async () => {
     if (!currentSession || !currentQuestion || !userAnswer.trim()) return;

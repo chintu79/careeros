@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Clock,
   Calendar,
@@ -36,7 +36,7 @@ export const ApplicationTimelineView: React.FC<ApplicationTimelineViewProps> = (
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const loadTimeline = (cat = activeCategory) => {
+  const loadTimeline = useCallback((cat = activeCategory) => {
     setLoading(true);
     setError(null);
     fetchApplicationTimeline(100, cat)
@@ -49,11 +49,11 @@ export const ApplicationTimelineView: React.FC<ApplicationTimelineViewProps> = (
         setError('Failed to load application timeline. Please try again.');
       })
       .finally(() => setLoading(false));
-  };
+  }, [activeCategory]);
 
   useEffect(() => {
     loadTimeline(activeCategory);
-  }, [activeCategory]);
+  }, [loadTimeline, activeCategory]);
 
   const getSourceIcon = (sourceType?: string, eventCat?: string) => {
     if (sourceType === 'email' || eventCat === 'email') {

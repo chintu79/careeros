@@ -48,7 +48,9 @@ def _with_resume_metrics(func):
         return result
     return wrapper
 
-STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../storage/resumes"))
+# Storage root for resume artifacts. Production uses the default; tests set
+# CAREEROS_STORAGE_DIR to an isolated tmp dir before import (see tests/conftest.py).
+STORAGE_DIR = os.environ.get("CAREEROS_STORAGE_DIR") or os.path.abspath(os.path.join(os.path.dirname(__file__), "../../storage/resumes"))
 os.makedirs(STORAGE_DIR, exist_ok=True)
 
 def atomic_promote_file(source_path: str, target_path: str) -> None:

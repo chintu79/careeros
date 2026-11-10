@@ -23,25 +23,27 @@ export const AnalyticsView: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<SankeyNode | null>(null);
   const [chartViewMode, setChartViewMode] = useState<'diagram' | 'table'>('diagram');
 
-  const loadAll = async () => {
-    setLoading(true);
-    try {
-      const [anRes, skRes, effRes] = await Promise.all([
-        fetchAnalytics(),
-        fetchSankeyData(sourceFilter, categoryFilter),
-        fetchSourceEfficacyAnalytics().catch(() => [])
-      ]);
-      setAnalytics(anRes);
-      setSankeyData(skRes);
-      setSourceEfficacy(effRes || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // loadAll lives inside the effect: its only caller is the effect itself and it
+  // captures exactly the two filter inputs the effect subscribes to.
   useEffect(() => {
+    const loadAll = async () => {
+      setLoading(true);
+      try {
+        const [anRes, skRes, effRes] = await Promise.all([
+          fetchAnalytics(),
+          fetchSankeyData(sourceFilter, categoryFilter),
+          fetchSourceEfficacyAnalytics().catch(() => [])
+        ]);
+        setAnalytics(anRes);
+        setSankeyData(skRes);
+        setSourceEfficacy(effRes || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadAll();
   }, [sourceFilter, categoryFilter]);
 

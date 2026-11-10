@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sidebar, AppHeader, MobileDrawer, CommandPalette, KeyboardShortcutsModal } from './components/navigation';
 import { SummaryBanner } from './components/discovery/SummaryBanner';
 import { OpportunityFeed } from './components/discovery/OpportunityFeed';
@@ -48,7 +48,7 @@ const AppInner: React.FC = () => {
   const requestEpochRef = useRef<number>(0);
   const [navTab, setNavTab] = useState('overview'); // Default to overview
   const guardedNav = useNavigationGuard();
-  const go = (tab: string) => guardedNav(() => setNavTab(tab));
+  const go = useCallback((tab: string) => guardedNav(() => setNavTab(tab)), [guardedNav]);
   const [oppTab, setOppTab] = useState('recommended'); // recommended, latest, saved, expiring, applied, dismissed
   
   const [activeUserId, setActiveUserId] = useState<number>(() => getActiveUserId());
@@ -214,7 +214,7 @@ const AppInner: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [go]);
 
   useEffect(() => {
     ensureAuthenticated(activeUserId).catch(err => {
@@ -437,9 +437,14 @@ const AppInner: React.FC = () => {
       .catch(err => console.error(err));
   };
 
+  const loadDataRef = useRef(loadData);
+  useEffect(() => {
+    loadDataRef.current = loadData;
+  });
+
   useEffect(() => {
     if (navTab === 'discover') {
-      loadData(true, page, pageSize);
+      loadDataRef.current(true, page, pageSize);
     }
   }, [navTab, oppTab, filters, page, pageSize, activeUserId]);
 

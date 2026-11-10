@@ -5,8 +5,17 @@
 # pg_restore), dropped at session end. The live database is never opened by
 # tests; DATABASE_URL is rewritten before the engine is constructed.
 # ---------------------------------------------------------------------------
+# Test storage isolation — MUST run before any backend.app import.
+# Every pytest session gets a unique tmp dir for resume artifacts; the live
+# production storage directory is never opened, written to, or read by tests.
+# Parallel sessions/xdist workers each get their own dir via mkdtemp.
 import os
 import json
+import shutil
+import tempfile as _tempfile
+
+_ARTIFACT_STORAGE = _tempfile.mkdtemp(prefix="careeros-test-storage-")
+os.environ["CAREEROS_STORAGE_DIR"] = _ARTIFACT_STORAGE
 
 os.environ.setdefault("ENVIRONMENT", "test")
 # Relax fork rate limits enough for the full suite; production defaults stay as configured.
@@ -81,6 +90,33 @@ _probe = _engine.url
 assert _probe.database and _probe.database.startswith("careeros_test_"), (
     f"FATAL: backend engine bound to non-test database {_probe.database!r}; refusing to run."
 )
+
+# Storage fingerprint guard: no import path may bind the live storage directory.
+from backend.app.services import latex_compiler as _latex_compiler
+
+assert _latex_compiler.STORAGE_DIR == _ARTIFACT_STORAGE, (
+    f"FATAL: latex_compiler bound to non-test storage dir {_latex_compiler.STORAGE_DIR!r}; "
+    "test artifact isolation is broken. Refusing to run."
+)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _artifact_storage_lifecycle_guard():
+    """
+    Deterministic teardown of the isolated artifact storage dir at session end.
+    Success or failure, the directory is removed; if removal fails, the session
+    aborts loudly instead of leaving artifacts behind.
+    """
+    yield
+    try:
+        shutil.rmtree(_ARTIFACT_STORAGE)
+    except FileNotFoundError:
+        return
+    except Exception as exc:
+        raise RuntimeError(
+            f"artifact storage cleanup FAILED for {_ARTIFACT_STORAGE}: {exc}. "
+            "Remove the directory manually before trusting any later run."
+        ) from exc
 
 
 @pytest.fixture(scope="session", autouse=True)

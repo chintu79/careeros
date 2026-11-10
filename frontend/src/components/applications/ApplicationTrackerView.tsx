@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Kanban,
   List,
@@ -80,23 +80,22 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
   const notesDirty = Boolean(selectedApp) && editingNotes !== (selectedApp?.user_notes ?? '');
   useUnsavedChangesGuard('tracker:notes', notesDirty, 'Application notes are not saved');
 
-  const loadApps = (p = page, ps = pageSize) => {
+  const loadApps = useCallback((p = page, ps = pageSize) => {
     setLoading(true);
     fetchApplications({ page: p, page_size: ps })
       .then((res) => {
         const items = res.items || [];
         setApps(items);
         setTotal(res.total || 0);
-        if (items.length > 0 && !selectedApp) {
-          setSelectedApp(items[0]);
-          setEditingNotes(items[0].user_notes || '');
-        }
+        // Auto-select the first record only when nothing is selected; the
+        // [selectedApp] effect syncs the notes editor afterwards.
+        setSelectedApp((prev) => prev ?? (items.length > 0 ? items[0] : prev));
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  };
+  }, [page, pageSize]);
 
-  const loadAlertsSummary = () => {
+  const loadAlertsSummary = useCallback(() => {
     fetchFollowUpAlerts(7)
       .then((res) => {
         const sum =
@@ -107,21 +106,21 @@ export const ApplicationTrackerView: React.FC<ApplicationTrackerViewProps> = ({
         setUrgentAlertsCount(sum);
       })
       .catch((err) => console.error(err));
-  };
+  }, []);
 
-  const loadEmailCount = () => {
+  const loadEmailCount = useCallback(() => {
     fetchEmailIntelligenceMessages({ page_size: 1 })
       .then((res) => {
         setPendingEmailCount(res.pending_review_count || 0);
       })
       .catch((err) => console.error(err));
-  };
+  }, []);
 
   useEffect(() => {
     loadApps(page, pageSize);
     loadAlertsSummary();
     loadEmailCount();
-  }, [page, pageSize]);
+  }, [page, pageSize, loadApps, loadAlertsSummary, loadEmailCount]);
 
   useEffect(() => {
     if (selectedApp) {

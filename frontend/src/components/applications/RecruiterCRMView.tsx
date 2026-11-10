@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Users,
   UserPlus,
@@ -72,25 +72,23 @@ export const RecruiterCRMView: React.FC = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const loadRecruiters = () => {
+  const loadRecruiters = useCallback(() => {
     setLoading(true);
     fetchRecruiters({ page_size: 100 })
       .then((data) => {
         const items = data.items || [];
         setRecruiters(items);
-        if (items.length > 0 && !selectedRecruiter) {
-          setSelectedRecruiter(items[0]);
-        }
+        setSelectedRecruiter((prev) => prev ?? (items.length > 0 ? items[0] : prev));
       })
       .catch((err) => {
         console.error('Failed to load recruiters:', err);
       })
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     loadRecruiters();
-  }, []);
+  }, [loadRecruiters]);
 
   const handleCreateRecruiter = async (e: React.FormEvent) => {
     e.preventDefault();

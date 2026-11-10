@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, RotateCw, ExternalLink, Search, CheckCircle2 } from 'lucide-react';
 import { Company } from '../../types';
 import { fetchCompanies, addCompany, syncSingleCompany, detectAtsFromUrl } from '../../services/api';
@@ -25,17 +25,17 @@ export const CompanyDirectoryView: React.FC<{ embedded?: boolean }> = ({ embedde
   const [modalError, setModalError] = useState<string | null>(null);
   const [atsDetectedMsg, setAtsDetectedMsg] = useState<string | null>(null);
 
-  const loadCompanies = () => {
+  const loadCompanies = useCallback(() => {
     setLoading(true);
     fetchCompanies({ search, page: 1, page_size: 50 })
       .then(data => setCompanies(data.items || []))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
-  };
+  }, [search]);
 
   useEffect(() => {
     loadCompanies();
-  }, [search]);
+  }, [search, loadCompanies]);
 
   const handleCareerUrlChange = async (url: string) => {
     setNewCareerUrl(url);

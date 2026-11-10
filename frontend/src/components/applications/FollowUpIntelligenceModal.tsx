@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Sparkles,
   AlertTriangle,
@@ -57,7 +57,16 @@ export const FollowUpIntelligenceModal: React.FC<FollowUpIntelligenceModalProps>
   const [copied, setCopied] = useState<boolean>(false);
   const [approvalSuccess, setApprovalSuccess] = useState<string | null>(null);
 
-  const loadAlerts = (threshold = staleThreshold) => {
+  // Latest-value refs: the modal-open effect must not re-run when the user
+  // edits the tone picker or the custom note while drafts are being generated.
+  const toneRef = useRef(tone);
+  const customNoteRef = useRef(customNote);
+  useEffect(() => {
+    toneRef.current = tone;
+    customNoteRef.current = customNote;
+  });
+
+  const loadAlerts = useCallback((threshold: number) => {
     setLoading(true);
     fetchFollowUpAlerts(threshold)
       .then((res) => {
@@ -67,30 +76,31 @@ export const FollowUpIntelligenceModal: React.FC<FollowUpIntelligenceModalProps>
         console.error('Failed to load follow-up alerts:', err);
       })
       .finally(() => setLoading(false));
-  };
+  }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadAlerts(staleThreshold);
-      if (preselectedApp?.id) {
-        setSelectedAppId(preselectedApp.id);
-        handleGenerateDraft(preselectedApp.id, tone);
-      }
-    }
-  }, [isOpen, staleThreshold, preselectedApp]);
-
-  const handleGenerateDraft = async (appId: number, selectedTone = tone) => {
+  const handleGenerateDraft = useCallback(async (appId: number, selectedTone?: string) => {
     setGeneratingDraft(true);
     setApprovalSuccess(null);
     try {
-      const res = await generateFollowUpEmail(appId, selectedTone, customNote || undefined);
+      const t = selectedTone ?? toneRef.current;
+      const res = await generateFollowUpEmail(appId, t, customNoteRef.current || undefined);
       setDraft(res);
     } catch (err: any) {
       alert(err.message || 'Failed to generate email draft');
     } finally {
       setGeneratingDraft(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadAlerts(staleThreshold);
+      if (preselectedApp?.id) {
+        setSelectedAppId(preselectedApp.id);
+        handleGenerateDraft(preselectedApp.id);
+      }
+    }
+  }, [isOpen, staleThreshold, preselectedApp, loadAlerts, handleGenerateDraft]);
 
   const handleApproveAndSend = async () => {
     if (!selectedAppId || !draft) return;
@@ -98,7 +108,7 @@ export const FollowUpIntelligenceModal: React.FC<FollowUpIntelligenceModalProps>
     try {
       await approveFollowUpEmail(selectedAppId, 7, `Sent ${tone} follow-up email to ${draft.recipient_name || 'recruiter'}`);
       setApprovalSuccess('Follow-up approved and recorded! Next check-in scheduled for 7 days.');
-      loadAlerts();
+      loadAlerts(staleThreshold);
       if (onActionComplete) onActionComplete();
     } catch (err: any) {
       alert(err.message || 'Failed to approve follow-up');

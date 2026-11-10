@@ -46,23 +46,29 @@ export const ApplicationCalendarView: React.FC<ApplicationCalendarViewProps> = (
   const startQueryDate = new Date(year, month, 1 - firstDayOfMonth.getDay());
   const endQueryDate = new Date(year, month + 1, 6 - lastDayOfMonth.getDay());
 
-  const loadCalendar = () => {
-    setLoading(true);
-    const startStr = startQueryDate.toISOString().split('T')[0];
-    const endStr = endQueryDate.toISOString().split('T')[0];
-
-    fetchApplicationCalendar(startStr, endStr)
-      .then((data) => {
-        const list = Array.isArray(data) ? data : (data as any)?.events || [];
-        setEvents(list);
-      })
-      .catch((err) => {
-        console.error('Failed to load calendar events:', err);
-      })
-      .finally(() => setLoading(false));
-  };
-
+  // loadCalendar is only consumed by the effect; defining it (and the range it
+  // depends on) inside keeps the closure provably current with [year, month].
   useEffect(() => {
+    const loadCalendar = () => {
+      setLoading(true);
+      const firstDayOfMonth2 = new Date(year, month, 1);
+      const lastDayOfMonth2 = new Date(year, month + 1, 0);
+      const start = new Date(year, month, 1 - firstDayOfMonth2.getDay());
+      const end = new Date(year, month + 1, 6 - lastDayOfMonth2.getDay());
+      const startStr = start.toISOString().split('T')[0];
+      const endStr = end.toISOString().split('T')[0];
+
+      fetchApplicationCalendar(startStr, endStr)
+        .then((data) => {
+          const list = Array.isArray(data) ? data : (data as any)?.events || [];
+          setEvents(list);
+        })
+        .catch((err) => {
+          console.error('Failed to load calendar events:', err);
+        })
+        .finally(() => setLoading(false));
+    };
+
     loadCalendar();
   }, [year, month]);
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
   Plus,
@@ -80,26 +80,24 @@ export const InterviewJournalView: React.FC = () => {
   const [newAnswer, setNewAnswer] = useState('');
   const [newTopic, setNewTopic] = useState('');
 
-  const loadJournalData = async () => {
+  const loadJournalData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetchInterviews({ page_size: 50 });
       setInterviews(res.items || []);
-      if (res.items && res.items.length > 0 && !selectedEntry) {
-        setSelectedEntry(res.items[0]);
-      }
+      setSelectedEntry((prev) => prev ?? (res.items && res.items.length > 0 ? res.items[0] : prev));
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadJournalData();
-  }, []);
+  }, [loadJournalData]);
 
-  const handleStartPracticeFromPrep = (
+  const handleStartPracticeFromPrep = useCallback((
     category: string,
     question: string,
     hint: string,
@@ -109,7 +107,9 @@ export const InterviewJournalView: React.FC = () => {
   ) => {
     setPracticeTrigger({ category, question, hint, company, role, oppId });
     setActiveMainTab('practice');
-  };
+  }, []);
+
+  const clearPracticeTrigger = useCallback(() => setPracticeTrigger(null), []);
 
   const handleCreateInterview = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,7 +243,7 @@ export const InterviewJournalView: React.FC = () => {
       {activeMainTab === 'practice' && (
         <PracticeModeView
           initialPrepTrigger={practiceTrigger}
-          onClearInitialTrigger={() => setPracticeTrigger(null)}
+          onClearInitialTrigger={clearPracticeTrigger}
         />
       )}
 
