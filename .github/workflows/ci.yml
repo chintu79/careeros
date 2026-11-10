@@ -1,0 +1,199 @@
+# CareerOS — CI workflow (pull request validation + main-branch validation).
+#
+# Production deployment is NOT part of this workflow. It exercises only disposable,
+# synthetic infrastructure created per job (pgvector/pgvector:pg17 service containers
+# and local Docker volumes). No production credentials exist in this repository and
+# none may be added to CI secrets.
+#
+# Triggers: pull_request, push(main), workflow_dispatch (manual, for release candidates).
+# PR validation runs all required jobs. Merging requires the `release-gate` job.
+
+name: CareerOS CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.14"
+  NODE_VERSION: "22"
+
+jobs:
+  backend:
+    name: backend / full suite (synthetic, disposable)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: ci-not-a-secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      CAREEROS_CI_SYNTHETIC: "1"
+      CAREEROS_CI_DATABASE_URL: postgresql://postgres:ci-not-a-secret@127.0.0.1:5432/postgres
+      PYTHONPATH: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - name: Ensure PostgreSQL client tools
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install dependencies
+        run: python -m pip install -r backend/requirements.txt
+      - name: Syntax / import check
+        run: |
+          python -m compileall -q backend
+          python -c "import backend.app.main; print('import ok:', backend.app.main.app.title)"
+      - name: Full backend test suite (synthetic CI database)
+        working-directory: backend
+        run: python -m pytest tests/ -q
+      - name: Verify disposable fork teardown (hard fail on leaks)
+        run: |
+          LEFTOVER=$(PGPASSWORD=ci-not-a-secret psql -h 127.0.0.1 -U postgres -tAX \
+            -c "SELECT datname FROM pg_database WHERE datname LIKE 'careeros_test_%';")
+          if [ -n "$LEFTOVER" ]; then
+            echo "FAIL: disposable test databases remain: $LEFTOVER"
+            echo "Run: psql -h 127.0.0.1 -U postgres -c 'DROP DATABASE \"<name>\"' for each listed database."
+            exit 1
+          fi
+          echo "teardown verified: no disposable databases remain"
+
+  frontend:
+    name: frontend / install, typecheck, tests, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install (lockfile)
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+      - name: Vitest
+        working-directory: frontend
+        run: npx vitest run
+      - name: TypeScript + production build
+        working-directory: frontend
+        run: npm run build
+      - name: Lint (advisory; reported, not a release gate)
+        working-directory: frontend
+        continue-on-error: true
+        run: npm run lint
+
+  security:
+    name: security / static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: No committed environment files
+        run: |
+          if git ls-files | grep -E '(^|/)\.env($|[.])' | grep -vE '\.env[^.]*\.example'; then
+            echo "FAIL: a .env file is tracked; it must never be committed"
+            exit 1
+          fi
+          echo "ok: no .env file is tracked"
+      - name: No production infrastructure references in source
+        run: |
+          if git grep -nE 'supabase\.(co|internal)|pooler\.supabase\.com' -- ':!docs' ':!*.md' ':!.taste-skill'; then
+            echo "FAIL: production-infrastructure reference found"
+            exit 1
+          fi
+          echo "ok: no production references in tracked source"
+      - name: Migration authorization gates are present
+        run: |
+          grep -q -- '--authorize-production' backend/ops/migrate.py backend/ops/backfill_matches.py
+          grep -q -- '--target' backend/ops/migrate.py backend/ops/backfill_matches.py
+          grep -q 'CAREEROS_MIGRATION_AUTHORIZATION' deploy/.env.production.example
+          echo "ok: migration gates present"
+      - name: Backend image runs as non-root
+        run: |
+          grep -Eq '^USER [a-z]' deploy/Dockerfile.backend
+          echo "ok: backend image drops privileges (USER set)"
+      - name: Internal diagnostics endpoints are not publicly reachable
+        run: |
+          grep -q 'include_in_schema=False' backend/app/main.py
+          grep -q 'CAREEROS_DIAGNOSTICS_TOKEN' backend/app/main.py
+          echo "ok: internal endpoints are gated and unmounted from schema"
+      - name: Secret-shape scan (never prints values)
+        run: python .github/scripts/secret_scan.py
+
+  docker:
+    name: docker / build and boot validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose configuration validation
+        run: docker compose -f deploy/docker-compose.yml config --quiet
+      - name: Compose configuration (with CI override)
+        run: docker compose -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml config --quiet
+      - name: Prepare disposable CI database (create pgvector extension)
+        run: |
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml up -d ci-db
+          for i in $(seq 1 30); do
+            if docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T ci-db pg_isready -U postgres >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T ci-db \
+            psql -U postgres -d careeros_ci_boot -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      - name: Build and start stack
+        run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml up -d --build --wait --wait-timeout 180
+      - name: Liveness, readiness, SPA fallback, proxy, security headers
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:8080/api/health
+          curl -fsS http://127.0.0.1:8080/api/ready
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/some/deep/route)" = "200"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/opportunities)" = "401"
+          curl -sI http://127.0.0.1:8080/ | grep -iE 'content-security-policy|x-frame-options|x-content-type-options' || true
+      - name: Graceful stop and restart recovery
+        run: |
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml stop backend
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml start backend
+          sleep 5
+          for i in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/ready || true)
+            [ "$code" = "200" ] && break
+            sleep 2
+          done
+          test "$code" = "200"
+      - name: Teardown (remove stack and disposable volume)
+        run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml down -v --rmi local --remove-orphans
+
+  release-gate:
+    name: release gate (required, deployment NOT authorized)
+    needs: [backend, frontend, security, docker]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Required checks must all have succeeded
+        run: |
+          set -e
+          echo "backend:  ${{ needs.backend.result }}"
+          echo "frontend: ${{ needs.frontend.result }}"
+          echo "security: ${{ needs.security.result }}"
+          echo "docker:   ${{ needs.docker.result }}"
+          test "${{ needs.backend.result }}" = "success" || exit 1
+          test "${{ needs.frontend.result }}" = "success" || exit 1
+          test "${{ needs.security.result }}" = "success" || exit 1
+          test "${{ needs.docker.result }}" = "success" || exit 1
+          test "${{ needs.security.result }}" != "skipped"
+          test "${{ needs.docker.result }}" != "skipped"
+          echo "All required checks passed. Production migration/deploy/backup operations remain operator-gated and are NOT granted by this workflow."

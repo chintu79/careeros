@@ -1,0 +1,15 @@
+Morgan Taylor
+morgan.taylor@example.com | (555) 345-6789 | San Francisco, CA
+GitHub: https://github.com/morgantaylor | LinkedIn: https://linkedin.com/in/morgantaylor
+
+EDUCATION
+B.S. in Computer Science, UC Berkeley, 2026, GPA: 3.90
+
+SKILLS
+Languages: Python, TypeScript, SQL, Go
+Frameworks: FastAPI, React, Docker, Kubernetes
+
+PROJECTS
+Cloud Task Pipeline | Distributed Systems
+High-throughput worker pool handling concurrent tasks with Redis and FastAPI.
+Deployed containerized services using Docker on AWS cloud.

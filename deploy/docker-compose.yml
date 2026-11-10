@@ -1,0 +1,45 @@
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      - ENVIRONMENT=production
+      - AUTH_REQUIRED=true
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - CAREEROS_TOKEN_SECRET=${CAREEROS_TOKEN_SECRET}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - CAREEROS_ALLOWED_ORIGINS=${CAREEROS_ALLOWED_ORIGINS:-http://localhost:8080}
+      - TRUST_PROXY_HOPS=1
+      - SEED_DEMO_DATA=false
+      - CAREEROS_RUN_MIGRATIONS=0
+    volumes:
+      - resume_storage:/app/backend/storage/resumes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/api/ready', timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+    networks: [careeros]
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks: [careeros]
+
+networks:
+  careeros:
+    driver: bridge
+
+volumes:
+  resume_storage:
+    driver: local

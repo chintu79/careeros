@@ -1,0 +1,153 @@
+:root {
+  color-scheme: dark;
+
+  /* 4px spacing scale */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 40px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+
+  /* Typography scale */
+  --text-xs: 0.75rem;          /* 12px */
+  --text-sm: 0.8125rem;        /* 13px */
+  --text-base: 0.875rem;       /* 14px */
+  --text-lg: 1rem;             /* 16px */
+  --text-xl: 1.125rem;         /* 18px */
+  --text-2xl: 1.25rem;         /* 20px */
+  --text-display-s: 1.5rem;    /* 24px */
+  --text-display: 1.75rem;      /* 28px */
+  --text-section: 1.125rem;    /* 18px */
+  --text-title: 1rem;          /* 16px */
+  --text-lead: 0.875rem;       /* 14px */
+
+  /* Fonts */
+  --font-display: "Geist Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Geist Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-outlier: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+
+  /* Editorial Letter Spacing */
+  --tracking-display: -0.018em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0em;
+  --display-weight: 600;
+
+  /* Motion & Easing */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --dur-instant: 75ms;
+  --dur-micro: 120ms;
+  --dur-short: 160ms;
+  --dur-normal: 220ms;
+  --dur-long: 300ms;
+
+  /* Container & Layout */
+  --container: 1440px;
+  --gutter: 32px;
+  --gap-columns: 24px;
+  --sidebar-expanded: 240px;
+  --sidebar-collapsed: 64px;
+  --topbar-height: 56px;
+
+  /* Z-index layers */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* Dark-first Canvas & Surface Hierarchy */
+  --color-paper: #080A0D;        /* Ultra-deep canvas ground */
+  --color-paper-2: #11161F;      /* Primary cards & panels */
+  --color-paper-3: #161D28;      /* Elevated surfaces / controls */
+  --color-paper-4: #1C2534;      /* Floating overlays & modals */
+  --color-hover: #1D2635;        /* Interactive hover surface */
+  --color-sidebar: #0B0E14;      /* Distinct navigation ground */
+
+  /* Text & Inks */
+  --color-ink: #F8FAFC;          /* Primary crisp text (slate-50) */
+  --color-ink-2: #94A3B8;        /* Secondary reading text (slate-400) */
+  --color-muted: #7A869E;        /* Muted captions & shortcuts (slate-500) */
+  --color-disabled: #5B6678;     /* Inactive elements (slate-600) */
+
+  /* Keylines & Borders */
+  --color-rule: rgba(255, 255, 255, 0.12);        /* Primary border / active outline */
+  --color-rule-2: rgba(255, 255, 255, 0.07);      /* Subtle structural keyline */
+  --color-rule-subtle: rgba(255, 255, 255, 0.04); /* Faint interior divider */
+  --color-grid: rgba(255, 255, 255, 0.03);
+  --color-grid-2: rgba(255, 255, 255, 0.06);
+
+  /* Restrained Emerald / Mint Accent */
+  --color-accent: #3DD68C;
+  --color-accent-hover: #34C77E;
+  --color-accent-bg: rgba(61, 214, 140, 0.09);
+  --color-accent-border: rgba(61, 214, 140, 0.22);
+  --color-accent-shadow: rgba(61, 214, 140, 0.28);
+  --color-accent-ink: #051B11;
+  --color-focus: #3DD68C;
+  --color-aura: rgba(61, 214, 140, 0.06);
+  --color-selection: rgba(61, 214, 140, 0.20);
+
+  /* Bridge tokens: older components reference these. Maps to the new system. */
+  --color-primary:          var(--color-accent);
+  --color-primary-hover:     var(--color-accent-hover);
+  --color-accent-brand:      var(--color-accent);
+  --color-accent-subtle:     var(--color-accent-bg);
+  --color-surface:           var(--color-paper-2);
+  --color-surface-2:         var(--color-paper-3);
+  --color-surface-elevated:  var(--color-paper-4);
+  --color-surface-overlay:   var(--color-paper-4);
+  --color-ink-secondary:     var(--color-ink-2);
+  --color-ink-tertiary:      var(--color-muted);
+  --color-border:            var(--color-rule-2);
+  --color-border-hover:      var(--color-rule);
+  --radius-xs:               4px;
+  --radius-card-lg:          var(--radius-panel);
+  --text-secondary:          var(--color-ink-2);
+  --text-muted:              var(--color-muted);
+  --color-success-bg:        var(--color-success-bg);
+  --color-success-border:    var(--color-accent-border);
+  --color-warning-bg:        var(--color-warn-bg);
+  --color-error-bg:          var(--color-error-bg);
+  --color-info-bg:           var(--color-info-bg);
+  --shadow-card:             0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 0 0 1px var(--color-rule-subtle);
+  --shadow-hover:            0 2px 6px 0 rgba(0, 0, 0, 0.35), 0 0 0 1px var(--color-rule);
+  --shadow-focus:            0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-focus);
+  --text-mono:               var(--text-sm);
+
+  /* Functional Semantic Statuses */
+  --color-success: #3DD68C;
+  --color-success-bg: rgba(61, 214, 140, 0.10);
+  --color-warn: #F59E0B;
+  --color-warn-bg: rgba(245, 158, 11, 0.10);
+  --color-error: #EF4444;
+  --color-error-bg: rgba(239, 68, 68, 0.10);
+  --color-info: #38BDF8;
+  --color-info-bg: rgba(56, 189, 248, 0.10);
+
+  /* Precise Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-control: 6px;
+  --radius-standard: 8px;
+  --radius-card: 10px;
+  --radius-panel: 14px;
+  --radius-pill: 9999px;
+
+  /* Subtle Surface Depth & Shadows */
+  --rule-hair: 1px;
+  --rule-heavy: 2px;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-dropdown: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-modal: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
+}

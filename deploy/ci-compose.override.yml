@@ -1,0 +1,27 @@
+# CI-only override for the Docker validation job.
+# Adds a disposable PostgreSQL (pgvector) service with a throwaway password and points
+# the backend at it. Never deployed; never used outside CI.
+services:
+  backend:
+    environment:
+      DATABASE_URL: postgresql://postgres:ci-not-a-secret@ci-db:5432/careeros_ci_boot
+      SECRET_KEY: ci-simulation-secret-key-not-a-secret-00000000000000
+      CAREEROS_TOKEN_SECRET: ci-simulation-token-secret-not-a-secret-00000000
+      ENVIRONMENT: production
+      AUTH_REQUIRED: "true"
+      CAREEROS_ALLOWED_ORIGINS: https://ci.invalid
+      CAREEROS_RUN_MIGRATIONS: "0"
+      SEED_DEMO_DATA: "false"
+      TRUST_PROXY_HOPS: "1"
+
+  ci-db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_PASSWORD: ci-not-a-secret
+      POSTGRES_DB: careeros_ci_boot
+    networks: [careeros]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

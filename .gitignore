@@ -1,0 +1,25 @@
+# CareerOS local repository hygiene.
+# Real environment files must never be committed; templates are *.env.example / *.env.production.example.
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# caches / build outputs
+.pytest_cache/
+__pycache__/
+*.pyc
+dist/
+node_modules/
+venv/
+
+# resume artifacts are candidate PII; never commit them
+backend/storage/resumes/
+
+# fork-lifecycle markers live in the system temp dir; nothing to ignore here,
+# but harness metadata belongs nowhere in git
+.pytest-fork-*
+.orchestrate/
+
+# scratch / logs
+*.log
