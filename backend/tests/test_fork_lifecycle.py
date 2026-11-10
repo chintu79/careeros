@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 import pytest
 from sqlalchemy import create_engine, text
@@ -204,7 +205,7 @@ def test_partial_provisioning_failure_drops_fork(original_prod_url, monkeypatch)
     finally:
         engine.dispose()
     assert after == before
-    assert list(__import__("pathlib").Path("/tmp/opencode").glob("careeros-test-backup-*.dump")) == []
+    assert list(__import__("pathlib").Path(tempfile.gettempdir()).glob("careeros-test-backup-*.dump")) == []
 
 
 def test_interrupted_workflow_recovery(tmp_path, monkeypatch, original_prod_url):

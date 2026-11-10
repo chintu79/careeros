@@ -40,6 +40,7 @@ import atexit
 import os
 import subprocess
 import sys
+import tempfile
 import uuid
 from urllib.parse import urlparse
 
@@ -118,7 +119,7 @@ def make_disposable_pg_database(production_url: str) -> str:
             raise RuntimeError(f"Command failed ({' '.join(cmd[:2])}): {res.stderr.strip()[:300]}")
         return res
 
-    dump_file = f"/tmp/opencode/careeros-test-backup-{test_db}.dump"
+    dump_file = os.path.join(tempfile.gettempdir(), f"careeros-test-backup-{test_db}.dump")
     try:
         run(["psql", "-v", "ON_ERROR_STOP=1", "-h", host, "-p", str(port), "-U", user,
              "-d", "postgres", "-c", f'CREATE DATABASE "{test_db}"'])
@@ -167,7 +168,7 @@ def make_disposable_schema_only(production_url: str) -> str:
             raise RuntimeError(f"Command failed ({' '.join(cmd[:2])}): {res.stderr.strip()[:300]}")
         return res
 
-    dump_file = f"/tmp/opencode/schema-{test_db}.dump"
+    dump_file = os.path.join(tempfile.gettempdir(), f"schema-{test_db}.dump")
     try:
         run(["psql", "-v", "ON_ERROR_STOP=1", "-h", host, "-p", str(port), "-U", user,
              "-d", "postgres", "-c", f'CREATE DATABASE "{test_db}"'])
