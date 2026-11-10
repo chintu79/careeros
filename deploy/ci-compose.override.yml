@@ -4,7 +4,7 @@
 services:
   backend:
     environment:
-      DATABASE_URL: postgresql://postgres:ci-not-a-secret@ci-db:5432/careeros_ci_boot
+      DATABASE_URL: postgresql://postgres:ci-not-a-secret@ci-db:5432/careeros_ci_seeded
       SECRET_KEY: ci-simulation-secret-key-not-a-secret-00000000000000
       CAREEROS_TOKEN_SECRET: ci-simulation-token-secret-not-a-secret-00000000
       ENVIRONMENT: production
@@ -13,15 +13,22 @@ services:
       CAREEROS_RUN_MIGRATIONS: "0"
       SEED_DEMO_DATA: "false"
       TRUST_PROXY_HOPS: "1"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/api/health', timeout=5)"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   ci-db:
     image: pgvector/pgvector:pg17
     environment:
       POSTGRES_PASSWORD: ci-not-a-secret
-      POSTGRES_DB: careeros_ci_boot
+      POSTGRES_DB: careeros_ci_seeded
+    ports:
+      - "5433:5432"
     networks: [careeros]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 2s
       timeout: 3s
-      retries: 20
+      retries: 30

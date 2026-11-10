@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi.testclient import TestClient
 from pydantic import BaseModel
 
+from backend.tests.helpers_env import requires_ollama
 from backend.app.main import app
 from backend.app.config import settings
 from backend.app.services.ai.types import (
@@ -124,6 +125,7 @@ async def test_groq_adapter_schema_validation_failure():
 # --- 4. Ollama Adapter: Live Health Check against Local Daemon ---
 
 @pytest.mark.asyncio
+@requires_ollama
 async def test_ollama_adapter_live_health():
     adapter = OllamaAdapter()
     available, msg = await adapter.is_available()

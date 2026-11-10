@@ -35,12 +35,7 @@ def create_synthetic_test_database(maintenance_url: str) -> str:
 
     engine = create_engine(url)
     try:
-        with engine.begin() as conn:
-            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-        from backend.app.services.database_migration import run_database_migrations
-
-        run_database_migrations(engine)
-        _seed_synthetic_rows(engine)
+        _migrate_and_seed(engine)
     except Exception:
         engine.dispose()
         _psql(parsed, "postgres", f'DROP DATABASE IF EXISTS "{name}"', check=False)
@@ -55,6 +50,31 @@ def create_synthetic_test_database(maintenance_url: str) -> str:
         username=parsed.username or "",
     )
     return url
+
+
+def seed_existing_database(url: str) -> None:
+    """
+    Migrate and seed an existing disposable database (e.g. the CI-only service).
+    Used by the Docker validation job which boots both app and database inside a
+    single `docker compose` project; that database is NEVER the production one.
+    """
+    from backend.app.config import settings
+    settings.DATABASE_URL = url
+
+    engine = create_engine(url)
+    try:
+        _migrate_and_seed(engine)
+    finally:
+        engine.dispose()
+
+
+def _migrate_and_seed(engine) -> None:
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+    from backend.app.services.database_migration import run_database_migrations
+
+    run_database_migrations(engine)
+    _seed_synthetic_rows(engine)
 
 
 def _seed_synthetic_rows(engine) -> None:

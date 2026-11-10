@@ -50,8 +50,8 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - name: Ensure PostgreSQL client tools
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Ensure PostgreSQL client tools (+ Tectonic for LaTeX-safe tests)
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client tectonic
       - name: Install dependencies
         run: python -m pip install -r backend/requirements.txt
       - name: Syntax / import check
@@ -142,46 +142,40 @@ jobs:
     name: docker / build, seed and boot validation
     timeout-minutes: 40
     runs-on: ubuntu-latest
-    env:
-      CI_SECRET_KEY: ci-simulation-secret-key-not-a-secret-00000000000000
-    services:
-      postgres:
-        image: pgvector/pgvector:pg17
-        env:
-          POSTGRES_PASSWORD: ci-not-a-secret
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 20
+    env: {}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-      - name: Ensure PostgreSQL client tools
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Ensure PostgreSQL client tools (+ Tectonic for LaTeX-safe tests)
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client tectonic
       - name: Install Python dependencies
         run: python -m pip install -r backend/requirements.txt
       - name: Compose configuration validation
         run: docker compose -f deploy/docker-compose.yml config --quiet
       - name: Compose configuration (with CI override)
         run: docker compose -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml config --quiet
-      - name: Start disposable CI database (port 5433)
+      - name: Start disposable CI database (ci-db)
         run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml up -d --wait --wait-timeout 60 ci-db
-      - name: Create seeded database and vector extension
+      - name: Create seeded database and vector extension inside ci-db
         run: |
-          PGPASSWORD=ci-not-a-secret psql -h 127.0.0.1 -p 5433 -U postgres -c "CREATE DATABASE careeros_ci_seeded"
-          PGPASSWORD=ci-not-a-secret psql -h 127.0.0.1 -p 5433 -U postgres -d careeros_ci_seeded -c "CREATE EXTENSION IF NOT EXISTS vector;"
-      - name: Seed synthetic data into database (no production data)
-        run: |
-          export CAREEROS_CI_DATABASE_URL=postgresql://postgres:ci-not-a-secret@127.0.0.1:5433/careeros_ci_seeded PYTHONPATH=$PWD CAREEROS_CI_SYNTHETIC=1
-          python -c "from backend.app.testing.synthetic_fixture import seed_existing_database; seed_existing_database('postgresql://postgres:ci-not-a-secret@127.0.0.1:5433/careeros_ci_seeded')"
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T ci-db psql -U postgres -c "CREATE DATABASE careeros_ci_seeded"
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T ci-db psql -U postgres -d careeros_ci_seeded -c "CREATE EXTENSION IF NOT EXISTS vector;"
       - name: Build and start stack
-        run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml up -d --build --wait --wait-timeout 240
+        run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml up -d --build
+      - name: Wait for backend liveness
+        run: |
+          for i in $(seq 1 60); do
+            if docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/api/health', timeout=5)" >/dev/null 2>&1; then
+              echo "backend alive"
+              break
+            fi
+            sleep 2
+          done
+      - name: Seed synthetic data into the CI database using the backend image
+        run: docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T backend python -m backend.app.testing.seed_ci_cli
       - name: Liveness, readiness, SPA fallback, unauthenticated API (expect 401)
         run: |
           set -euo pipefail
@@ -193,8 +187,7 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/opportunities)" = "401" && echo "unauthenticated API 401"
       - name: Authenticated read-only API paths (synthetic data)
         run: |
-          export SECRET_KEY="${{ env.CI_SECRET_KEY }}" PYTHONPATH=$PWD
-          TOKEN=$(python -c 'from backend.app.core.auth import create_access_token; print(create_access_token(1))')
+          TOKEN=$(docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml exec -T backend python -c 'from backend.app.core.auth import create_access_token; print(create_access_token(1))')
           auth="Authorization: Bearer $TOKEN"
           echo "opportunities HTTP: $(curl -s -o /dev/null -w '%{http_code}' -H "$auth" http://127.0.0.1:8080/api/opportunities)"
           echo "candidate   HTTP: $(curl -s -o /dev/null -w '%{http_code}' -H "$auth" http://127.0.0.1:8080/api/candidate)"
@@ -212,7 +205,7 @@ jobs:
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/internal/diagnostics)" = "404"
       - name: Backend logs do not contain credential-shaped values
         run: |
-          docker compose -p careeros-ci logs backend --tail=200 > /tmp/careeros-ci-logs.txt
+          docker compose -p careeros-ci -f deploy/docker-compose.yml -f deploy/ci-compose.override.yml logs backend --tail=200 > /tmp/careeros-ci-logs.txt
           if grep -E 'password|SECRET_KEY|TOKEN_SECRET|DATABASE_URL|postgres://|psql://' /tmp/careeros-ci-logs.txt; then
             echo "FAIL: credential-shaped values found in backend logs"; exit 1
           fi
