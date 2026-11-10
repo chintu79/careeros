@@ -249,3 +249,156 @@ def test_recovery_refuses_marker_without_server_match(tmp_path, monkeypatch, ori
         "created_utc": "2026-11-09T00:00:00Z",
     }))
     report = fork_lifecycle.recover_stale_forks(confirm=True)
+
+
+# ---------------------------------------------------------------------------
+# Marker reconciliation (3.0.8.1) — additive, removes markers only when the
+# database is confirmed absent. Never drops a database, never contacts a
+# foreign server, never acts on ambiguous state.
+# ---------------------------------------------------------------------------
+
+class _ReconcileBasis:
+    hostname = "fork.example.com"
+    port = 54322
+    username = "forkowner"
+
+
+def _write_reconcile_marker(tmp_path, name, *, host="fork.example.com", port=54322,
+                            username="forkowner", contents=None):
+    path = fork_lifecycle._marker_path(name)
+    if contents is not None:
+        path.write_text(contents, encoding="utf-8")
+    else:
+        fork_lifecycle.write_marker(name, host=host, port=port, username=username)
+    return path
+
+
+@pytest.fixture
+def reconcile_env(monkeypatch):
+    basis = _ReconcileBasis()
+    monkeypatch.setattr(fork_lifecycle, "_production_basis", lambda: basis)
+    drop_calls = []
+    monkeypatch.setattr(
+        db_guard, "drop_test_database",
+        lambda *args, **kwargs: drop_calls.append(args) or "dropped",
+    )
+    return drop_calls
+
+
+def test_reconcile_marker_removed_when_database_absent_and_confirmed(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_absentaaaa01"
+    path = _write_reconcile_marker(tmp_path, name)
+    monkeypatch.setattr(fork_lifecycle, "database_exists", lambda b, n: False)
+
+    dry = fork_lifecycle.reconcile_stale_markers(confirm=False)
+    assert dry[0]["removed"] is False
+    assert path.exists()
+
+    confirmed = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert confirmed[0]["removed"] is True
+    assert not path.exists()
+    assert reconcile_env == [], "reconciliation must never drop a database"
+
+
+def test_reconcile_marker_retained_when_database_present(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_presentbbbb002"
+    path = _write_reconcile_marker(tmp_path, name)
+    monkeypatch.setattr(fork_lifecycle, "database_exists", lambda b, n: True)
+
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert verdicts[0]["removed"] is False
+    assert "present" in verdicts[0]["verdict"]
+    assert path.exists()
+
+
+def test_reconcile_foreign_host_marker_retained_without_server_contact(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_foreigncccc003"
+    path = _write_reconcile_marker(tmp_path, name, host="evil.example.com")
+
+    _real = fork_lifecycle.database_exists
+
+    def _boom(prod, database):
+        if getattr(prod, "hostname", None) == "fork.example.com":
+            raise AssertionError("foreign server must never be contacted")
+        return _real(prod, database)
+
+    monkeypatch.setattr(fork_lifecycle, "database_exists", _boom)
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert verdicts[0]["removed"] is False
+    assert "coordinates" in verdicts[0]["verdict"]
+    assert path.exists()
+
+
+def test_reconcile_foreign_owner_marker_retained(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_ownerddd444"
+    path = _write_reconcile_marker(tmp_path, name, username="someone_else")
+
+    _real = fork_lifecycle.database_exists
+
+    def _boom(prod, database):
+        if getattr(prod, "hostname", None) == "fork.example.com":
+            raise AssertionError("server must not be contacted for unknown owners")
+        return _real(prod, database)
+
+    monkeypatch.setattr(fork_lifecycle, "database_exists", _boom)
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert verdicts[0]["removed"] is False
+    assert "owner" in verdicts[0]["verdict"]
+    assert path.exists()
+
+
+def test_reconcile_invalid_markers_retained(tmp_path, monkeypatch, reconcile_env):
+    bad_data = fork_lifecycle._marker_path("careeros_test_invalidxeee005")
+    bad_data.write_text("{not valid json", encoding="utf-8")
+    mismatched = fork_lifecycle._marker_path("careeros_test_mismatchfff006")
+    mismatched.write_text(json.dumps({"database": "careeros_test_otherggg007"}), encoding="utf-8")
+    foreign_prefix = fork_lifecycle._marker_dir() / "random_name.json"
+    foreign_prefix.write_text(json.dumps({"database": "random_name"}), encoding="utf-8")
+
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    by_db = {v["database"]: v for v in verdicts}
+    assert "invalid" in by_db["careeros_test_invalidxeee005"]["verdict"]
+    assert "invalid" in by_db["careeros_test_mismatchfff006"]["verdict"]
+    assert "invalid" in by_db["random_name"]["verdict"]
+    assert bad_data.exists() and mismatched.exists()
+
+
+def test_reconcile_unreachable_server_retains_marker(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_unreachablehh008"
+    path = _write_reconcile_marker(tmp_path, name)
+
+    _real = fork_lifecycle.database_exists
+
+    def _unreachable(prod, database):
+        if getattr(prod, "hostname", None) == "fork.example.com":
+            raise RuntimeError("connection refused")
+        return _real(prod, database)
+
+    monkeypatch.setattr(fork_lifecycle, "database_exists", _unreachable)
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert verdicts[0]["removed"] is False
+    assert "unreachable" in verdicts[0]["verdict"]
+    assert path.exists()
+
+
+def test_reconcile_repeated_is_idempotent(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_twiceiiii009"
+    path = _write_reconcile_marker(tmp_path, name)
+    monkeypatch.setattr(fork_lifecycle, "database_exists", lambda b, n: False)
+
+    first = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert first[0]["removed"] is True
+    second = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert all(v["removed"] is False for v in second)
+    assert not any(v["database"] == name for v in second)
+
+
+def test_reconcile_never_drops_database(tmp_path, monkeypatch, reconcile_env):
+    name = "careeros_test_nodropjjj0010"
+    _write_reconcile_marker(tmp_path, name)
+    monkeypatch.setattr(fork_lifecycle, "database_exists", lambda b, n: False)
+    monkeypatch.setattr(fork_lifecycle, "OwnedFork",
+                        lambda *a, **k: pytest.fail("OwnedFork must never be constructed by reconciliation"))
+    verdicts = fork_lifecycle.reconcile_stale_markers(confirm=True)
+    assert verdicts[0]["removed"] is True
+    assert reconcile_env == []

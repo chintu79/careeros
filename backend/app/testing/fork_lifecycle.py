@@ -303,6 +303,85 @@ def _production_basis():
     return parse_pg_url(settings.DATABASE_URL)
 
 
+def reconcile_stale_markers(confirm: bool = False) -> List[Dict[str, Any]]:
+    """
+    Reconcile lifecycle markers against the expected fork server, WITHOUT ever
+    dropping a database.
+
+    A marker is removable only when all of the following hold:
+      - it is a readable CareerOS lifecycle marker whose `database` field matches
+        its filename and which carries complete host/port/username ownership metadata;
+      - its host/port/username match this machine's fork basis exactly (foreign
+        servers and roles are never contacted);
+      - psql confirms the database is absent on that server.
+
+    Everything else is reported retained — databases are never dropped, servers
+    are never contacted for foreign markers, and ambiguity blocks any action.
+    Idempotent: running twice removes nothing the second time.
+    """
+    verdicts: List[Dict[str, Any]] = []
+    try:
+        basis = _production_basis()
+    except Exception as exc:
+        return [{"database": "<all>", "removed": False,
+                 "verdict": f"retain: cannot resolve fork-server basis: {exc}"}]
+
+    for marker in sorted(_marker_dir().glob("*.json")):
+        name = marker.stem
+        entry: Dict[str, Any] = {"database": name, "removed": False, "verdict": None}
+
+        data = read_marker(name)
+        if data is None:
+            entry["verdict"] = "invalid: unreadable or mismatched marker; retained"
+            verdicts.append(entry)
+            continue
+        if not name.startswith(TEST_DB_PREFIX):
+            entry["verdict"] = "invalid: not a CareerOS lifecycle marker (prefix mismatch); retained"
+            verdicts.append(entry)
+            continue
+
+        host, port, user = data.get("host"), data.get("port"), data.get("username")
+        try:
+            port = int(port or 0)
+        except (TypeError, ValueError):
+            port = 0
+        if not isinstance(host, str) or not isinstance(user, str) or not host or not user or not port:
+            entry["verdict"] = "invalid: incomplete ownership metadata; retained"
+            verdicts.append(entry)
+            continue
+
+        if host != (basis.hostname or "localhost") or port != int(basis.port or 5432):
+            entry["verdict"] = "retain: marker server coordinates do not match this fork server"
+            verdicts.append(entry)
+            continue
+        if user != basis.username:
+            entry["verdict"] = f"retain: marker owner {user!r} does not match this server role"
+            verdicts.append(entry)
+            continue
+
+        try:
+            exists = database_exists(basis, name)
+        except Exception as exc:
+            entry["verdict"] = f"retain: server unreachable ({type(exc).__name__}); cannot verify; retained"
+            verdicts.append(entry)
+            continue
+
+        if exists:
+            entry["verdict"] = "retain: database present; marker is live (crash recovery finishes teardown)"
+            verdicts.append(entry)
+            continue
+
+        if confirm:
+            remove_marker(name)
+            entry["removed"] = True
+            entry["verdict"] = "removed: database confirmed absent; marker deleted"
+        else:
+            entry["verdict"] = "eligible: database confirmed absent (dry run; pass --confirm to remove)"
+        verdicts.append(entry)
+
+    return verdicts
+
+
 # ---------------------------------------------------------------------------
 # Crash recovery
 # ---------------------------------------------------------------------------
@@ -383,10 +462,18 @@ def _main() -> int:
 
     parser = argparse.ArgumentParser(prog="backend.app.testing.fork_lifecycle")
     parser.add_argument("--recover", action="store_true", help="list or drop forks carrying lifecycle markers")
+    parser.add_argument("--reconcile-markers", action="store_true", help="remove markers whose fork database is confirmed absent (never drops a database)")
     parser.add_argument("--confirm", action="store_true", help="actually drop eligible forks (default is dry run)")
     args = parser.parse_args()
+    if args.reconcile_markers:
+        verdicts = reconcile_stale_markers(confirm=args.confirm)
+        for entry in verdicts:
+            print(f"{entry['verdict']} — {entry['database']}")
+        removed = sum(1 for v in verdicts if v.get("removed"))
+        print(f"reconcile-markers: {removed} removed, {len(verdicts) - removed} retained/invalid")
+        return 0
     if not args.recover:
-        parser.error("pass --recover")
+        parser.error("pass --recover or --reconcile-markers")
     results = recover_stale_forks(confirm=args.confirm)
     for entry in results:
         print(f"{entry['verdict']} — {entry['database']}")
