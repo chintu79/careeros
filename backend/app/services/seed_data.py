@@ -48,16 +48,16 @@ INITIAL_PREFERENCES = {
 }
 
 INITIAL_CANDIDATE = {
-    "name": "Shreekrishna Chinta",
+    "name": "Candidate One",
     "email": "synthetic.candidate@example.test",
     "phone": "+90 555 000 0001",
     "location": "Pune, Maharashtra, India",
-    "bio": "AI & Data Science student at AISSMS-IOIT Pune, building full-stack applications, intelligent automation systems, and developer tools.",
+    "bio": "AI & Data Science student at Regional University Pune, building full-stack applications, intelligent automation systems, and developer tools.",
     "degree": "B.Tech in Artificial Intelligence & Data Science",
     "graduation_year": 2028,
-    "college": "AISSMS Institute of Information Technology (AISSMS-IOIT), Pune",
+    "college": "Regional University",
     "github_url": "https://github.com/synthetic-candidate",
-    "linkedin_url": "https://www.linkedin.com/in/shreekrishna-chinta/",
+    "linkedin_url": "https://www.linkedin.com/in/synthetic-candidate/",
     "skills": [
         {"name": "Python", "level": "advanced", "category": "Languages"},
         {"name": "JavaScript", "level": "advanced", "category": "Languages"},
@@ -104,7 +104,7 @@ INITIAL_CANDIDATE = {
     "experience": [
         {
             "title": "Web Team Member",
-            "company": "ACM Student Chapter, AISSMS-IOIT",
+            "company": "ACM Student Chapter, Regional University",
             "duration": "Ongoing",
             "description": "Resolved frontend issues, built responsive UI components, and shipped bug fixes using HTML, CSS, JavaScript, React, and Next.js. Collaborated through Git and GitHub for issue tracking, pull requests, and code reviews."
         },

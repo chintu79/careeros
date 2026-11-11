@@ -48,7 +48,7 @@ describe('AppHeader Component', () => {
     fireEvent.click(userBtn);
 
     expect(screen.getByText(/Candidate Profile Context/i)).toBeInTheDocument();
-    expect(screen.getByText('Shreekrishna Chinta')).toBeInTheDocument();
+    expect(screen.getByText('Candidate One')).toBeInTheDocument();
     expect(screen.getByText('Candidate B (Demo)')).toBeInTheDocument();
 
     // Click Candidate B

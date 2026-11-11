@@ -35,11 +35,11 @@ const prefs: UserPreferences = {
 
 const candidate: CandidateProfile = {
   id: 1,
-  name: 'Shreekrishna Chinta',
+  name: 'Candidate One',
   email: 'synthetic.candidate@example.test',
   degree: 'B.Tech AI & Data Science',
   graduation_year: 2028,
-  college: 'AISSMS-IOIT',
+  college: 'Regional University',
   cgpa: 8.5,
   location: 'Pune',
   skills: [],
@@ -65,7 +65,7 @@ describe('Settings & Account workspace', () => {
     expect(screen.getByText('Machine Learning')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /^Account/ }));
-    expect(await screen.findByText('Shreekrishna Chinta')).toBeInTheDocument();
+    expect(await screen.findByText('Candidate One')).toBeInTheDocument();
     expect(screen.getByText('synthetic.candidate@example.test')).toBeInTheDocument();
     expect(screen.getByText('evidence v34')).toBeInTheDocument();
   });

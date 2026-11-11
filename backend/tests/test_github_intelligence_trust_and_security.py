@@ -496,7 +496,7 @@ def test_06_missing_production_encryption_key():
 def test_07_token_never_appearing_in_api_responses_or_logs():
     """Verify that GitHub Personal Access Tokens are never returned in responses, errors, or logs."""
     headers = auth_headers(TEST_USER_A)
-    sensitive_token = "ghp_SECRETTOKEN1234567890ABCDEFGHIJKLMNO"  # secret-scan-allow: synthetic test fixture
+    sensitive_token = "ghp_testfixture0000002"  # secret-scan-allow: synthetic test fixture
 
     # 1. Save token
     resp = client.post("/api/candidate/integrations/github/token", json={"token": sensitive_token}, headers=headers)
@@ -573,7 +573,7 @@ def test_10_encryption_key_rotation_strategy():
     """Verify MultiFernet key rotation: older ciphertext decrypts cleanly and rotate_token_ciphertext() upgrades it."""
     old_secret = "older-secret-key-for-career-os-2025"
     new_secret = "brand-new-primary-secret-key-32chars-2026"
-    test_token = "ghp_MultiFernetRotationVerificationToken"  # secret-scan-allow: synthetic test fixture
+    test_token = "ghp_testfixture0000003"  # secret-scan-allow: synthetic test fixture
 
     # 1. Encrypt with old single Fernet
     from cryptography.fernet import Fernet

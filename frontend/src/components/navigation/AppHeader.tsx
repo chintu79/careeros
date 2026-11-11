@@ -163,7 +163,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <span className="hidden sm:inline font-mono font-medium">
                 {isDev 
                   ? (activeUserId === 1 ? 'Candidate A (User 1)' : 'Candidate B (User 2)')
-                  : (activeUserId === 1 ? 'Shreekrishna Chinta' : `User ${activeUserId}`)}
+                  : (activeUserId === 1 ? 'Candidate One' : `User ${activeUserId}`)}
               </span>
               <span className="sm:hidden font-mono">U{activeUserId}</span>
               <ChevronDown className="h-3 w-3 text-[var(--color-muted)]" aria-hidden="true" />
@@ -196,7 +196,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                             : 'text-[var(--color-ink)] hover:bg-[var(--color-hover)]'
                         }`}
                       >
-                        <span className="font-semibold">Shreekrishna Chinta</span>
+                        <span className="font-semibold">Candidate One</span>
                         {activeUserId === 1 && <Check className="h-3.5 w-3.5 text-[var(--color-accent)]" />}
                       </button>
 
@@ -221,7 +221,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
                   {!isDev && (
                     <div className="px-2 py-2">
-                      <div className="font-semibold text-[var(--color-ink)]">Shreekrishna Chinta</div>
+                      <div className="font-semibold text-[var(--color-ink)]">Candidate One</div>
                       <div className="text-[11px] text-[var(--color-muted)] font-mono">Verified Candidate Account</div>
                     </div>
                   )}

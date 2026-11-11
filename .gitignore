@@ -23,3 +23,9 @@ backend/storage/resumes/
 
 # scratch / logs
 *.log
+
+# local deployment state (version stamps; never secrets)
+.deploy-state/
+
+# staging clone of the fresh-install example (never committed)
+.selfhost-fresh/

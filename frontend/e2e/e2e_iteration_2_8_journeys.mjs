@@ -453,7 +453,7 @@ async function runE2E() {
     // -------------------------------------------------------------------------
     // JOURNEY 10: Existing Candidate Returns Without Losing Previous Information
     // -------------------------------------------------------------------------
-    console.log('\n--- Journey 10: Switch to Candidate 1 (Shreekrishna Chinta) & Verify Data Integrity ---');
+    console.log('\n--- Journey 10: Switch to Candidate 1 (Candidate One) & Verify Data Integrity ---');
     
     // Switch account to Candidate 1
     const headerUserBtn = await page.waitForSelector('header button[title*="Candidate profile context"]');
@@ -462,7 +462,7 @@ async function runE2E() {
 
     const [switchResp] = await Promise.all([
       page.waitForResponse(resp => resp.url().includes('/api/auth/token') && resp.status() === 200),
-      page.click('button[role="menuitem"]:has-text("Shreekrishna Chinta")')
+      page.click('button[role="menuitem"]:has-text("Candidate One")')
     ]);
     await sleep(1000);
 
@@ -487,7 +487,7 @@ async function runE2E() {
     console.log(`Candidate 1 Onboarding Status: ${cand1.onboarding_status}`);
     console.log(`Candidate 1 Projects Count: ${cand1.projects.length}`);
 
-    if (cand1.user_id !== 1 || cand1.name !== 'Shreekrishna Chinta') {
+    if (cand1.user_id !== 1 || cand1.name !== 'Candidate One') {
       throw new Error(`Candidate 1 identity compromised: id=${cand1.user_id}, name=${cand1.name}`);
     }
     if (cand1.projects.length !== 7) {

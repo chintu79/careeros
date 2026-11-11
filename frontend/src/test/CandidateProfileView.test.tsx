@@ -23,11 +23,11 @@ const linuxSkill = { name: 'Linux', level: 'intermediate', category: 'Tools' };
 
 const baseCandidate = (): CandidateProfile => ({
   id: 1,
-  name: 'Shreekrishna Chinta',
+  name: 'Candidate One',
   email: 'synthetic.candidate@example.test',
   degree: 'B.Tech AI & DS',
   graduation_year: 2028,
-  college: 'AISSMS-IOIT',
+  college: 'Regional University',
   cgpa: 8.16,
   skills: [pythonSkill, linuxSkill],
   projects: [],

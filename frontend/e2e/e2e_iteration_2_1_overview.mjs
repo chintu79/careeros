@@ -116,13 +116,13 @@ async function runOverviewAudit() {
     console.log('Switched to Candidate B successfully.');
     await page.screenshot({ path: path.join(ARTIFACTS_DIR, 'iteration_2_1_candidate_b_overview.png') });
 
-    // Switch back to Candidate 1 (Shreekrishna)
+    // Switch back to Candidate 1 (CandidateOne)
     await candidateSwitcherBtn.click();
     await page.waitForTimeout(400);
-    const candidateAItem = page.locator('button[role="menuitem"]:has-text("Shreekrishna")');
+    const candidateAItem = page.locator('button[role="menuitem"]:has-text("CandidateOne")');
     await candidateAItem.click();
     await page.waitForTimeout(1000);
-    console.log('Switched back to Candidate 1 (Shreekrishna).');
+    console.log('Switched back to Candidate 1 (CandidateOne).');
   }
 
   await context.close();

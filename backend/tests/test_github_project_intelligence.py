@@ -627,7 +627,7 @@ async def test_13_incremental_sync_and_caching():
 # -------------------------------------------------------------------------
 def test_14_secure_token_storage_and_removal(clean_db):
     db = clean_db
-    raw_pat = "ghp_PersonalAccessTokenWithVerySecretValue999"  # secret-scan-allow: synthetic test fixture
+    raw_pat = "ghp_testfixture0000001"  # secret-scan-allow: synthetic test fixture
 
     # 1. Store token
     saved = save_github_token_for_user(TEST_USER_ID, raw_pat, db)

@@ -136,7 +136,7 @@ def test_s002_upload_rejects_fake_pdf_magic_bytes():
 
 
 def test_s002_valid_text_resume_upload_returns_structured_preview():
-    body = b"Shreekrishna Chinta\nPython, FastAPI, PostgreSQL\nProjects: Lead Automation (Python)"
+    body = b"Candidate One\nPython, FastAPI, PostgreSQL\nProjects: Lead Automation (Python)"
     res = client.post(
         "/api/candidate/integrations/parse-resume",
         files={"file": ("resume.txt", body, "text/plain")},

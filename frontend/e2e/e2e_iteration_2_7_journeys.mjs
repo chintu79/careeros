@@ -39,7 +39,7 @@ async function runE2E() {
     console.log('\n--- Journey 1 & 2: Sign in with Bearer token & Open Discovery ---');
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
 
-    // Ensure authenticated as User 1 (Shreekrishna Chinta)
+    // Ensure authenticated as User 1 (Candidate One)
     await page.evaluate(async (backendUrl) => {
       const res = await fetch(`${backendUrl}/api/auth/token`, {
         method: 'POST',

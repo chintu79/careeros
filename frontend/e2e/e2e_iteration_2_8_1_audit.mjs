@@ -384,7 +384,7 @@ async function runAuditE2E() {
 
     await Promise.all([
       page.waitForResponse(resp => resp.url().includes('/api/auth/token') && resp.status() === 200),
-      page.click('button[role="menuitem"]:has-text("Shreekrishna Chinta")')
+      page.click('button[role="menuitem"]:has-text("Candidate One")')
     ]);
     await sleep(1000);
 
@@ -400,7 +400,7 @@ async function runAuditE2E() {
     });
     const cand1Final = await cand1FinalRes.json();
 
-    if (cand1Final.user_id !== 1 || cand1Final.name !== 'Shreekrishna Chinta' || cand1Final.projects.length !== 7 || cand1Final.onboarding_status !== 'completed') {
+    if (cand1Final.user_id !== 1 || cand1Final.name !== 'Candidate One' || cand1Final.projects.length !== 7 || cand1Final.onboarding_status !== 'completed') {
       throw new Error(`Candidate 1 corrupted during audit: ${JSON.stringify(cand1Final)}`);
     }
     console.log('✓ Candidate 1 Verified 100% Intact: 7 projects preserved, onboarding_status="completed"');
