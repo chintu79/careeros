@@ -211,9 +211,10 @@ def test_partial_provisioning_failure_drops_fork(original_prod_url, monkeypatch)
 def test_interrupted_workflow_recovery(tmp_path, monkeypatch, original_prod_url):
     monkeypatch.setenv("CAREEROS_FORK_MARKER_DIR", str(tmp_path / "markers"))
     prod = parse_pg_url(original_prod_url)
+    repo_root = str(__import__("pathlib").Path(__file__).resolve().parents[2])
     child = f"""
 import os, sys
-sys.path.insert(0, "/home/krishna/Desktop/interniq")
+sys.path.insert(0, {repo_root!r})
 from backend.app.testing import fork_lifecycle
 fork = fork_lifecycle.provision({original_prod_url!r}, schema_only=True)
 print(f"FORK:{{fork.name}}", flush=True)

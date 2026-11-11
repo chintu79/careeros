@@ -113,16 +113,16 @@ const mockAuditReport: ResumeQualityAuditResult = {
 const mockProfile: CandidateProfile = {
   id: 1,
   user_id: 1,
-  name: 'Krishna Patel',
-  email: 'krishna@example.com',
+  name: 'Alex Candidate',
+  email: 'alex.candidate@example.test',
   phone: '+91 9876543210',
   location: 'Pune, India',
   college: 'PICT Pune',
   degree: 'B.Tech AI & Data Science',
   graduation_year: 2028,
   cgpa: 8.16,
-  github_url: 'https://github.com/krishna',
-  linkedin_url: 'https://linkedin.com/in/krishna',
+  github_url: 'https://github.com/synthetic-candidate',
+  linkedin_url: 'https://linkedin.com/in/synthetic-candidate',
   skills: [
     { name: 'Python', category: 'Languages' },
     { name: 'React', category: 'Frameworks' },
@@ -131,7 +131,7 @@ const mockProfile: CandidateProfile = {
     { title: 'Software Engineering Intern', company: 'TechCorp', duration: 'Jun - Aug 2025', description: 'Built APIs' }
   ],
   projects: [
-    { title: 'CareerOS AI', tech_stack: ['Python', 'FastAPI'], description: 'Autonomous agent platform', url: 'https://github.com/krishna/careeros' }
+    { title: 'CareerOS AI', tech_stack: ['Python', 'FastAPI'], description: 'Autonomous agent platform', url: 'https://github.com/synthetic-candidate/careeros' }
   ],
   created_at: '2026-11-01T00:00:00Z',
   updated_at: '2026-11-09T00:00:00Z',

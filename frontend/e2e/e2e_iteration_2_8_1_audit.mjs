@@ -1,10 +1,10 @@
 import { chromium } from 'playwright';
 import path from 'path';
 
-const ARTIFACT_DIR = '/home/krishna/.gemini/antigravity/brain/913ec7f7-c5ad-46ab-9267-acc5887bf6b9';
+const ARTIFACT_DIR = process.env.CAREEROS_E2E_ARTIFACTS || path.join(process.cwd(), 'artifacts');
 const BASE_URL = 'http://127.0.0.1:5174';
 const BACKEND_URL = 'http://127.0.0.1:8005';
-const TEST_RESUME_PATH = '/home/krishna/Desktop/interniq/frontend/e2e/test_resume.txt';
+const TEST_RESUME_PATH = path.join(process.cwd(), 'e2e', 'test_resume.txt');
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

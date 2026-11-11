@@ -409,7 +409,7 @@ export const EmailIntelligenceReviewModal: React.FC<EmailIntelligenceReviewModal
                       rows={5}
                       value={rawBody}
                       onChange={(e) => setRawBody(e.target.value)}
-                      placeholder="Hi Krishna, We were impressed with your application and would like to schedule a 45-minute technical interview. Please join using Google Meet: https://meet.google.com/xyz-abcd-efg on Oct 25 at 3 PM..."
+                      placeholder="Hi Alex, We were impressed with your application and would like to schedule a 45-minute technical interview. Please join using Google Meet: https://meet.google.com/xyz-abcd-efg on Oct 25 at 3 PM..."
                       className="w-full bg-[var(--color-paper-2)] border border-white/[0.09] rounded-lg p-3 text-xs text-[var(--color-ink)] placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
                     />
                   </div>
@@ -428,7 +428,7 @@ export const EmailIntelligenceReviewModal: React.FC<EmailIntelligenceReviewModal
                         setRawSubject('Invitation to Technical Screen: Stripe Backend Intern');
                         setRawSender('recruiting@stripe.com');
                         setRawBody(
-                          'Hi Krishna,\n\nWe would love to invite you to a 45-minute technical screen for the Backend Engineering Internship position at Stripe.\n\nPlease join via Google Meet: https://meet.google.com/abc-defg-hij on Friday at 2:00 PM EST.\n\nBest,\nStripe Recruiting Team'
+                          'Hi Alex,\n\nWe would love to invite you to a 45-minute technical screen for the Backend Engineering Internship position at Stripe.\n\nPlease join via Google Meet: https://meet.google.com/abc-defg-hij on Friday at 2:00 PM EST.\n\nBest,\nStripe Recruiting Team'
                         );
                       }}
                       className="text-xs text-slate-400 hover:text-emerald-400 transition"

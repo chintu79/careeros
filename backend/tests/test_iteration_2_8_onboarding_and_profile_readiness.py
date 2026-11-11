@@ -244,7 +244,7 @@ def test_existing_projects_preservation_during_onboarding():
         "title": "Autonomous Agentic Sandbox",
         "description": "Experimental multi-agent orchestrator with typed tool protocols",
         "tech_stack": ["Python", "FastAPI", "Docker"],
-        "url": "https://github.com/krishna/agentic-sandbox"
+        "url": "https://github.com/synthetic-candidate/agentic-sandbox"
     }
     resp = client.post("/api/candidate/projects", json=new_proj, headers=headers)
     assert resp.status_code == 200

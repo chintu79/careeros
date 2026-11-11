@@ -81,7 +81,7 @@ def test_structured_email_data_extraction_and_sanitization():
     """Verify meeting links, deadline extraction, and strict HTML sanitization without fabrication."""
     malicious_body = """
     <script>alert('pwned');</script>
-    <p>Hi Krishna,</p>
+    <p>Hi Alex,</p>
     <p>Please join our technical interview on Google Meet: 
        <a href="https://meet.google.com/abc-defg-hij">Google Meet Link</a>
     </p>

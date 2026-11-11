@@ -157,7 +157,7 @@ async def seed_initial_data(db: Session):
     """Seed default candidate profile, preferences, companies, sources, and rich opportunities."""
     # 1. Candidate Profile
     if not db.query(CandidateProfile).first():
-        logger.info("Seeding candidate profile for Krishna...")
+        logger.info("Seeding candidate profile...")
         cand = CandidateProfile(**INITIAL_CANDIDATE)
         db.add(cand)
         db.commit()

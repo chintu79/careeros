@@ -156,7 +156,7 @@ def test_api_endpoints():
     # 7. Candidate Profile
     res_cand = client.get("/api/candidate")
     assert res_cand.status_code == 200
-    assert "Krishna" in res_cand.json()["name"] or "chinta" in res_cand.json()["name"].lower()
+    assert "Alex" in res_cand.json()["name"]
     
     # 8. Analytics
     res_analytics = client.get("/api/analytics")

@@ -39,7 +39,7 @@ def classify_calendar_event(title: str, description: str = "") -> Tuple[str, Opt
     elif any(k in text for k in ["follow up", "follow-up", "check-in"]):
         event_type = EVENT_TYPE_FOLLOW_UP_REMINDER
 
-    # Extract company (e.g. "Interview with Stripe", "Palantir Technical Screen", "Google / Krishna")
+    # Extract company (e.g. "Interview with Stripe", "Palantir Technical Screen", "Google / Alex")
     company = None
     with_match = re.search(r"\b(?:with|at|@|/)\s+([A-Z][a-zA-Z0-9&.-]+)", title)
     if with_match:

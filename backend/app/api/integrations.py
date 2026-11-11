@@ -238,7 +238,7 @@ def seed_sandbox_data(db: Session = Depends(get_db)):
         conn = IntegrationConnection(
             provider="google",
             account_email="synthetic.candidate@example.test",
-            account_name="Krishna (Sandbox)",
+            account_name="Alex (Sandbox)",
             scopes=MINIMUM_GOOGLE_SCOPES,
             connection_status="connected",
             last_sync_at=now
@@ -296,7 +296,7 @@ def seed_sandbox_data(db: Session = Depends(get_db)):
             "sender": "Sarah Jenkins <sjenkins@stripe.com>",
             "recipient": conn.account_email,
             "snippet": "We were very impressed by your background and would like to invite you to a technical interview for the Software Engineering Intern role.",
-            "body_plain": """Hi Krishna,
+            "body_plain": """Hi Alex,
 
 Thank you for applying to Stripe! Our hiring team reviewed your application and projects, and we would like to invite you to a 45-minute Technical Interview (Round 1).
 
@@ -320,7 +320,7 @@ University Recruiting | Stripe""",
             "sender": "Palantir Campus Recruiting <recruiting@palantir.com>",
             "recipient": conn.account_email,
             "snippet": "Please complete your HackerRank coding challenge for the Forward Deployed Software Engineer Intern role before the deadline.",
-            "body_plain": """Dear Krishna,
+            "body_plain": """Dear Alex,
 
 Thank you for your interest in Palantir Technologies! As the next step for your Forward Deployed Software Engineer Intern application, please complete our technical coding challenge.
 
@@ -344,7 +344,7 @@ Palantir Recruiting Team""",
             "sender": "Marcus Vance <marcus@ramp.com>",
             "recipient": conn.account_email,
             "snippet": "We are thrilled to extend a formal offer of employment for the Backend Engineering Intern position at Ramp.",
-            "body_plain": """Dear Krishna,
+            "body_plain": """Dear Alex,
 
 On behalf of the entire team at Ramp, I am thrilled to extend you a formal offer for the Backend Engineering Intern role for Summer 2026!
 
@@ -364,7 +364,7 @@ Head of Engineering Talent | Ramp""",
             "sender": "Datadog Careers <no-reply@datadoghq.com>",
             "recipient": conn.account_email,
             "snippet": "We have received your application for Software Engineer Intern - Distributed Systems.",
-            "body_plain": """Hello Krishna,
+            "body_plain": """Hello Alex,
 
 Thank you for applying to Datadog! We received your application for the Software Engineer Intern - Distributed Systems position.
 
