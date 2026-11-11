@@ -12,6 +12,7 @@ import { LandingNav } from './LandingNav';
 import { ProductFrame } from './ProductFrame';
 import { Reveal } from './Reveal';
 import { ChapterProgress } from './ChapterProgress';
+import { DevAnnotation } from './DevAnnotation';
 import { ScatteredChapter } from './ScatteredChapter';
 import { ConnectedChapter } from './ConnectedChapter';
 import { DiscoverChapter } from './DiscoverChapter';
@@ -277,6 +278,7 @@ const LandingPage = () => {
           <span>React, FastAPI, PostgreSQL</span>
         </div>
       </footer>
+      <DevAnnotation />
     </div>
   );
 };
