@@ -6,13 +6,13 @@ Out of scope: production data, resume contents of live users, credentials (never
 ## 1. Headline findings (severity-ordered)
 
 ### P0 — live credentials committed to the developer example file
-The env template shipped with populated values for: `DATABASE_URL` (a managed Postgres URL with inline password), `GROQ_API_KEY`, `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`. The file was tracked from project init.
+The env template shipped with populated values for: `DATABASE_URL` (a loopback Supabase CLI DSN using the CLI's default local credentials — not a hosted/cloud credential), `ADZUNA_APP_ID`, `ADZUNA_APP_KEY`. Fingerprint re-verification (2026-11-11) confirms these three; no real `GROQ_API_KEY` was confirmed in history.
 
 `deploy/.env.production.example` also carried a populated `DATABASE_URL`.
 
 **Remediation applied in this phase** — production-shaped example values replaced with inert placeholders in both files. The push mirror was scrubbed the same way before the public release branch was cut.
 
-**Note:** history is not rewritten. The public remote may still serve the affected values from older commits. **Operator action required:** inspect the public tree, rotate the hosted-DB credential and the Adzuna credentials, and decide whether a history rewrite or force-push is acceptable. Branch protection on `main` means a direct scrub requires either temporary relaxation of protection or a reviewed scrub PR — not an action an agent may take alone.
+**Note:** history is not rewritten. The public remote may still serve the affected values from older commits. **Operator action required:** abandon or regenerate the Adzuna pair, and either bind the local Supabase DB port to loopback or rotate the local stack credential; decide whether a history rewrite or force-push is acceptable. Branch protection on `main` means a direct scrub requires either temporary relaxation of protection or a reviewed scrub PR — not an action an agent may take alone.
 
 ### P0 — hardcoded default signing secret in source
 `backend/app/config.py` shipped a hardcoded default `SECRET_KEY` for all environments. Any instance booting without `SECRET_KEY` set signs tokens with a publicly known key — trivial token forgery.
@@ -49,7 +49,7 @@ The public CI reports findings on every PR. Any remaining secret-shaped strings 
 
 ## 3. Outstanding operator actions
 
-1. Rotate the hosted-DB credential and Adzuna credentials that appeared in example files historically.
+1. Abandon or regenerate the Adzuna credentials that appeared in example files historically; bind the local Supabase DB port to loopback (or rotate the local stack credential if desired).
 2. Decide on git history rewrite for the public remote (or accept and document the exposure).
 3. Choose a license (MIT/Apache-2.0/AGPL-3.0) and approve adding `LICENSE`.
 4. Approve PR #2 (public release branch) and merge to `main`.

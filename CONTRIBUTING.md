@@ -16,8 +16,9 @@ cd careeros
 python -m venv backend/venv && backend/venv/bin/pip install -r backend/requirements.txt
 npm --prefix frontend ci
 
-# Backend test isolation uses a disposable schema-only mirror of a live-looking database,
-# never the production cluster, and never touches resume files on disk (they are PII).
+# Backend tests create their own disposable synthetic database on the server in
+# DATABASE_URL: empty -> migrate -> deterministic seed. The configured database
+# is never cloned, so operator rows are never read. The role needs CREATEDB.
 backend/venv/bin/pytest tests/ -q
 
 # Frontend

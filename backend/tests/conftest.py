@@ -17,6 +17,10 @@ import tempfile as _tempfile
 _ARTIFACT_STORAGE = _tempfile.mkdtemp(prefix="careeros-test-storage-")
 os.environ["CAREEROS_STORAGE_DIR"] = _ARTIFACT_STORAGE
 
+# Test-only synthetic secrets; never used in production.
+os.environ.setdefault("SECRET_KEY", "careeros-test-secret-key-not-a-real-secret-0000000000000")
+os.environ.setdefault("CAREEROS_TOKEN_SECRET", "careeros-test-token-secret-not-a-real-secret-00000000")
+
 os.environ.setdefault("ENVIRONMENT", "test")
 # Relax fork rate limits enough for the full suite; production defaults stay as configured.
 os.environ.setdefault("RATE_LIMIT_SCALE", "200")
@@ -59,6 +63,9 @@ else:
     # Capture the authoritative production URL before any rewrite so tests can prove isolation.
     _settings.ORIGINAL_DATABASE_URL = _PRODUCTION_URL
 
+    # Same safety model as CI: create a brand-new synthetic database on the configured
+    # maintenance server, migrate it, and seed deterministic synthetic rows. The configured
+    # database is never cloned — tests must not depend on operator profile data.
     # Critical: two mechanisms, both required.
     # (1) os.environ rewrite — spawned worker processes import from scratch and pick it up.
     # (2) settings.DATABASE_URL rewrite — this process already imported config; the cached
@@ -66,11 +73,18 @@ else:
     if _EXPLICIT_TEST_URL:
         assert_disposable_pg_url(_EXPLICIT_TEST_URL, _PRODUCTION_URL)
         _TEST_URL = _EXPLICIT_TEST_URL
-    else:
-        from backend.app.testing import fork_lifecycle as _fork_lifecycle
-
-        _LIFECYCLE_FORK = _fork_lifecycle.provision(_PRODUCTION_URL, schema_only=_SCHEMA_ONLY)
+    elif _SCHEMA_ONLY:
+        _LIFECYCLE_FORK = _fork_lifecycle.provision(_PRODUCTION_URL, schema_only=True)
         _TEST_URL = _LIFECYCLE_FORK.url
+    else:
+        from backend.app.testing import synthetic_fixture as _synthetic_fixture
+
+        _TEST_URL = _synthetic_fixture.create_synthetic_test_database(_PRODUCTION_URL)
+        _LIFECYCLE_FORK = _fork_lifecycle.OwnedFork(
+            _TEST_URL,
+            _TEST_URL.rsplit("/", 1)[-1],
+            _fork_lifecycle.parse_pg_url(_PRODUCTION_URL),
+        )
 os.environ["DATABASE_URL"] = _TEST_URL
 _settings.DATABASE_URL = _TEST_URL
 

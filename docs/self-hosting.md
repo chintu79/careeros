@@ -74,10 +74,9 @@ docker compose exec -T db pg_dump -U careeros -d careeros > careeros_$(date +%F)
 
 # Resume artifacts — copy the persistent volume to a safe location
 docker run --rm -v resume_storage:/data -v /tmp:/backup alpine:latest tar -C /data -czf /backup/careeros-resumes-$(date +%F).tgz .
-
-# Encrypted off-box backup via the repository's tooling (operator-controlled only):
-python -m backend.ops.backup_offbox --create --source <path> --dest /mnt/offbox --keep-last 7
 ```
+
+Off-box/scheduled backups are operator-specific and are not bundled in this release; use the commands above or your own tooling.
 
 ## Restore
 
