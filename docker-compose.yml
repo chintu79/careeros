@@ -50,8 +50,6 @@ services:
       CAREEROS_STORAGE_DIR: /app/backend/storage/resumes
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       INTERNAL_GATEWAY_SECRET: ${INTERNAL_GATEWAY_SECRET:-}
-      ADZUNA_APP_ID: ${ADZUNA_APP_ID:-}
-      ADZUNA_APP_KEY: ${ADZUNA_APP_KEY:-}
       MATCHING_ENGINE_GENERATION: ${MATCHING_ENGINE_GENERATION:-2}
     volumes:
       - resume_storage:/app/backend/storage/resumes

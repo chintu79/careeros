@@ -49,7 +49,6 @@ The first user to reach onboarding completes it and permanently claims the insta
 | `SEED_DEMO_DATA` | no | do **not** enable in a real install |
 | `GROQ_API_KEY` | no | AI-enhanced writing; absent → AI features disabled gracefully |
 | `OLLAMA_BASE_URL` | no | defaults to `http://host.docker.internal:11434` |
-| `ADZUNA_APP_ID`/`KEY` | no | optional opportunity source |
 
 ## Restart & upgrade
 

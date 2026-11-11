@@ -138,7 +138,6 @@ INITIAL_SOURCES = [
     {"name": "SmartRecruiters", "source_type": "ats", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 6},
     {"name": "Remotive", "source_type": "api", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 12},
     {"name": "Remote OK", "source_type": "api", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 12},
-    {"name": "Adzuna", "source_type": "api", "integration_method": "api", "connection_status": "needs_configuration", "sync_frequency_hours": 12},
     {"name": "RSS Feeds", "source_type": "rss", "integration_method": "feed", "connection_status": "connected", "sync_frequency_hours": 6},
     {"name": "Manual Import", "source_type": "manual", "integration_method": "direct_url", "connection_status": "manual_import_only", "sync_frequency_hours": 24},
     {"name": "Internshala", "source_type": "portal", "integration_method": "direct_url", "connection_status": "manual_import_only", "sync_frequency_hours": 24},

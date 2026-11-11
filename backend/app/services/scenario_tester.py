@@ -12,7 +12,6 @@ from backend.app.connectors.lever import LeverConnector, DEFAULT_LEVER_SITES
 from backend.app.connectors.smartrecruiters import SmartRecruitersConnector
 from backend.app.connectors.remotive import RemotiveConnector
 from backend.app.connectors.remoteok import RemoteOKConnector
-from backend.app.connectors.adzuna import AdzunaConnector
 from backend.app.connectors.india_platforms import INDIA_PLATFORMS
 
 from backend.app.pipeline.normalizer import normalize_job_dict
@@ -186,21 +185,7 @@ async def execute_scenario(
     except Exception as e:
         sources_failed.append({"source": "Remote OK API", "reason": str(e)})
 
-    # 9. Adzuna API
-    try:
-        sources_queried.append("Adzuna API")
-        c_adz = AdzunaConnector()
-        jobs_adz = await c_adz.fetch_jobs()
-        if not jobs_adz:
-            sources_failed.append({
-                "source": "Adzuna API",
-                "reason": "API credentials (ADZUNA_APP_ID, ADZUNA_APP_KEY) not configured in environment"
-            })
-        raw_collected.extend(jobs_adz)
-    except Exception as e:
-        sources_failed.append({"source": "Adzuna API", "reason": str(e)})
-
-    # 10. Document India Portal Statuses
+    # 9. Document India Portal Statuses
     for p_key, p_info in INDIA_PLATFORMS.items():
         if p_key in ["internshala", "linkedin"]:
             continue

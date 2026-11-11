@@ -23,10 +23,6 @@ class Settings(BaseSettings):
     OLLAMA_EMBED_MODEL: str = os.getenv("OLLAMA_EMBED_MODEL", "bge-m3")
     OLLAMA_CHAT_MODEL: str = os.getenv("OLLAMA_CHAT_MODEL", "llama3.2:latest")
     
-    # Adzuna credentials (can be overridden via UI Source Management)
-    ADZUNA_APP_ID: str = os.getenv("ADZUNA_APP_ID", "")
-    ADZUNA_APP_KEY: str = os.getenv("ADZUNA_APP_KEY", "")
-    
     ALLOWED_ORIGINS: List[str] = []  # populated from CAREEROS_ALLOWED_ORIGINS below
 
     

@@ -20,7 +20,6 @@ from backend.app.connectors.ashby import AshbyConnector, DEFAULT_ASHBY_ORGS
 from backend.app.connectors.smartrecruiters import SmartRecruitersConnector
 from backend.app.connectors.remotive import RemotiveConnector
 from backend.app.connectors.remoteok import RemoteOKConnector
-from backend.app.connectors.adzuna import AdzunaConnector
 from backend.app.connectors.rss_feed import RSSFeedConnector
 from backend.app.connectors.internshala import InternshalaConnector
 from backend.app.connectors.linkedin import LinkedInJobsConnector
@@ -154,15 +153,12 @@ async def _run_connector_sync_impl(source_name: str, db: Session = None, timeout
                 connector = RemoteOKConnector()
                 raw_jobs = await connector.fetch_jobs()
             elif "adzuna" in s_lower:
-                app_id = source.config_data.get("app_id") if source and source.config_data else None
-                app_key = source.config_data.get("app_key") if source and source.config_data else None
-                if not app_id or not app_key:
-                    if source:
-                        source.connection_status = "not_configured"
-                        db.commit()
-                    return {"retrieved": 0, "new": 0, "updated": 0, "duplicate": 0, "expired": 0, "relevant": 0, "errors": 0, "message": "Adzuna credentials not configured"}
-                connector = AdzunaConnector(app_id=app_id, app_key=app_key)
-                raw_jobs = await connector.fetch_jobs()
+                # Retired in v3.1.0; keep a truthful state for pre-existing rows.
+                if source:
+                    source.connection_status = "unsupported"
+                    source.last_error_message = "Adzuna integration retired in v3.1.0"
+                    db.commit()
+                return {"retrieved": 0, "new": 0, "updated": 0, "duplicate": 0, "expired": 0, "relevant": 0, "errors": 0, "message": "Adzuna integration retired in v3.1.0"}
             elif "rss" in s_lower:
                 custom_feed = source.config_data.get("feed_url") if source and source.config_data else None
                 connector = RSSFeedConnector(feed_url=custom_feed)
