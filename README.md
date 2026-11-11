@@ -5,14 +5,6 @@ The backend ships a working matching engine, resume builder (LaTeX → PDF), opp
 discovery pipeline, application tracker, and candidate profile graph. PostgreSQL with
 pgvector for embeddings. No paid services required to run it.
 
-## Screenshots
-
-> _(add before launch)_
-> - Overview workspace
-> - Applications board
-> - Resume Studio
-> - Career Insights
-
 ## Features
 
 - **Overview** — KPI snapshot of your pipeline (applications, interviews, responses, offers) and "Needs you today" recommendations.
@@ -21,7 +13,7 @@ pgvector for embeddings. No paid services required to run it.
 - **Discover** — Filtered opportunity feed with full-text and vector hybrid match scoring, ranking snapshots, and a saved/applied list.
 - **Interviews** — Question practice with local AI evaluation; on/off methodology (Groq or Ollama — see AI providers below).
 - **Career Insights** — Sankey flow, conversion analysis, source efficacy.
-- **Backup drill** — Encrypted off-box snapshot workflow (operator-initiated, not scheduled by default).
+- **Backup drill** — operator-initiated snapshot of the database and résumé artifacts, with a manifest and SHA-256 checksums. Snapshots are **unencrypted**; checksums verify integrity, not confidentiality. No scheduler or off-box target is bundled.
 
 ## Prerequisites
 
@@ -36,10 +28,10 @@ pgvector for embeddings. No paid services required to run it.
 git clone <repository-url> careeros
 cd careeros
 cp .env.example .env
-# Open .env and set:
-#   POSTGRES_PASSWORD
-#   SECRET_KEY            (openssl rand -hex 32)
-#   CAREEROS_TOKEN_SECRET (openssl rand -hex 32)
+# Generate and replace the empty required values before starting:
+#   python3 -c "import secrets; print(secrets.token_hex(32))"
+#   POSTGRES_PASSWORD, SECRET_KEY, CAREEROS_TOKEN_SECRET
+# The stack refuses to start while any of them is blank.
 docker compose up -d --build
 ```
 

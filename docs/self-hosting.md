@@ -14,12 +14,21 @@ A minimal, reproducible install for a single user on your machine.
 git clone <repository-url> careeros
 cd careeros
 
-# minimum configuration
+# minimum configuration: replace the three empty required values
 cp .env.example .env
-.edit_me_required \
-  POSTGRES_PASSWORD="$(openssl rand -hex 12)" \
-  SECRET_KEY="$(openssl rand -hex 32)" \
-  CAREEROS_TOKEN_SECRET="$(openssl rand -hex 32)"
+python3 - <<'PY'
+import pathlib, secrets
+
+env = pathlib.Path(".env")
+text = env.read_text()
+for key, size in (
+    ("POSTGRES_PASSWORD", 24),
+    ("SECRET_KEY", 32),
+    ("CAREEROS_TOKEN_SECRET", 32),
+):
+    text = text.replace(f"{key}=\n", f"{key}={secrets.token_hex(size)}\n", 1)
+env.write_text(text)
+PY
 
 # build + start (first build downloads base images ~800 MB – 1.2 GB)
 docker compose up -d --build
@@ -74,6 +83,10 @@ docker compose exec -T db pg_dump -U careeros -d careeros > careeros_$(date +%F)
 # Resume artifacts — copy the persistent volume to a safe location
 docker run --rm -v resume_storage:/data -v /tmp:/backup alpine:latest tar -C /data -czf /backup/careeros-resumes-$(date +%F).tgz .
 ```
+
+**These backups are unencrypted.** The backup manifest and its SHA-256 checksums verify
+integrity only — they do not provide confidentiality. Encrypt copies with your own
+tooling before storing them off-box.
 
 Off-box/scheduled backups are operator-specific and are not bundled in this release; use the commands above or your own tooling.
 

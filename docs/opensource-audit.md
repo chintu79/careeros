@@ -1,4 +1,4 @@
-# CareerOS — Open-Source & Self-Hosting Audit (Phase 1, 2026-11-12)
+# CareerOS — Open-Source & Self-Hosting Audit (Phase 1, 2026-11-11)
 
 Scope: the local working tree with `careeros-push` mirror as the public artifact.
 Out of scope: production data, resume contents of live users, credentials (never read).

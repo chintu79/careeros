@@ -11,7 +11,7 @@ CareerOS stores personally identifying information (resumes, contact details and
 ## Authentication model
 
 - Bearer tokens (HMAC-SHA256), TTL up to 24 h, revocable by bumping `TOKEN_VERSION`. There are no user accounts inside the DB — tokens are identity.
-- Empty instances (zero candidate profiles) accept token minting for user_id=1 during the bootstrap window. The window closes permanently once onboarding is marked completed.
+- Token minting without a trusted gateway is allowed only while the instance is unclaimed: no profile has completed onboarding (`onboarding_status = "completed"` and `onboarding_step >= 6`) and at most one candidate profile exists (a single partial setup profile is tolerated). Completing onboarding closes the window permanently.
 - Defaults: no admin dashboard, no unauthenticated write endpoints, rate limiting is on by default.
 
 ## Hardening checklist for self-hosting
