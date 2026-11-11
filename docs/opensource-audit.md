@@ -12,7 +12,7 @@ The env template shipped with populated values for: `DATABASE_URL` (a loopback S
 
 **Remediation applied in this phase** — production-shaped example values replaced with inert placeholders in both files. The push mirror was scrubbed the same way before the public release branch was cut.
 
-**Note:** history is not rewritten. The public remote may still serve the affected values from older commits. **Operator action required:** abandon or regenerate the Adzuna pair, and either bind the local Supabase DB port to loopback or rotate the local stack credential; decide whether a history rewrite or force-push is acceptable. Branch protection on `main` means a direct scrub requires either temporary relaxation of protection or a reviewed scrub PR — not an action an agent may take alone.
+**Note:** history is not rewritten — the operator decision is to preserve existing history. The public remote may still serve the affected values from older commits. **Operator action required:** revoke the Adzuna pair in the Adzuna developer portal (retiring the integration does not revoke credentials), and bind the local Supabase DB port to loopback using the commands in §5. No history rewrite will be performed.
 
 ### P0 — hardcoded default signing secret in source
 `backend/app/config.py` shipped a hardcoded default `SECRET_KEY` for all environments. Any instance booting without `SECRET_KEY` set signs tokens with a publicly known key — trivial token forgery.
@@ -45,19 +45,52 @@ The public CI reports findings on every PR. Any remaining secret-shaped strings 
 - Env templates (dev + production examples) contain placeholders only; verified before the release branch was cut.
 - PII scrub applied across source/tests/e2e: personal name → synthetic placeholder, college → generic placeholder, emails/phones/URLs → example.com placeholders.
 - Docs package added: README (self-host quickstart), SECURITY.md, CONTRIBUTING.md, CHANGELOG.md, ROADMAP.md, docs/self-hosting.md, docs/troubleshooting.md.
-- LICENSE choice and publish/visibility change remain **operator decisions** — not taken by the agent.
+- Apache License 2.0 adopted (operator decision): root `LICENSE` added and `frontend/package.json` declares `Apache-2.0`. Publish/visibility change remains an **operator decision** — not taken by the agent.
 
 ## 3. Outstanding operator actions
 
-1. Abandon or regenerate the Adzuna credentials that appeared in example files historically; bind the local Supabase DB port to loopback (or rotate the local stack credential if desired).
-2. Decide on git history rewrite for the public remote (or accept and document the exposure).
-3. Choose a license (MIT/Apache-2.0/AGPL-3.0) and approve adding `LICENSE`.
-4. Approve PR #2 (public release branch) and merge to `main`.
-5. P0-05 (production restore drill) remains blocked by the free Supabase tier — operator choice, not agent action.
+1. Revoke the Adzuna credentials that appeared in example files historically. The integration is retired in v3.1.0 and the code no longer reads these values, but removing code does not revoke credentials.
+2. Bind the local Supabase DB port to loopback using the operator-run commands in §5.
+3. Approve PR #2 (public release branch) and merge to `main`.
+4. P0-05 (production restore drill) remains blocked by the free Supabase tier — operator choice, not agent action.
+
+Git history is preserved by operator decision; no rewrite or force-push was performed.
 
 ## 4. Verification performed
 
 - Fresh-install proof on a disposable clone: clone → env from templates → `docker compose up -d --build` → all three services healthy; nginx serves SPA (200) and proxies API (200).
+- Disposable self-host re-validation (2026-11-11): 3/3 services healthy; `/api/health` and `/api/ready` 200; first-run token mint 200 with `mode=production`; authenticated `GET /api/candidate` 200; backend+frontend restart keeps health/ready 200; `pgdata` and `resume_storage` volumes persist; backend logs contain no secret-shaped lines.
 - Token minting bootstrap: open only pre-onboarding-completion; hard-closed after `onboarding_status=completed` + `onboarding_step>=6`.
-- 566 backend tests pass; frontend vitest 83/83 green; local secret scan clean.
+- 559 backend tests pass (1 skipped) in local synthetic mode, including the Adzuna-retirement regressions; frontend vitest 83/83 green; local secret scan clean.
+- `docker compose config` validates; local Supabase CLI accepts a read-only loopback query (`select 1`) at `127.0.0.1:54322`. The current host publish remains `0.0.0.0` until the operator runs the §5 change.
 - Live production backend (PID 2739463, :8005) and frontend (:5174) never touched; resume storage never read or modified.
+
+## 5. Local Supabase CLI port binding (operator-run)
+
+The public repository does not ship a `supabase/config.toml`; the local stack on this workstation is managed by the Supabase CLI in an operator-side project directory (outside this repository). Its `[db] port = 54322` sets the port only — there is no host-IP setting — and the running container publishes `0.0.0.0:54322 -> 5432/tcp` (verified with `docker inspect`: empty `HostIp`). This is a **local-development** exposure, not a hosted Supabase configuration.
+
+Official Supabase guidance for loopback-only local ports is a custom Docker bridge network with a host-binding option. The exact operator-run change (requires stopping and starting the local stack; not performed by the release session, and it does not touch any hosted project):
+
+```bash
+cd <your-supabase-project>        # directory containing supabase/config.toml
+docker network create \
+  -o 'com.docker.network.bridge.host_binding_ipv4=127.0.0.1' \
+  careeros-local-loopback
+
+npx supabase stop          # local stack only
+npx supabase start --network-id careeros-local-loopback
+
+# verify: expect only 127.0.0.1:54322, no 0.0.0.0/[::] entries
+docker port supabase_db_<project-id>
+psql 'postgresql://postgres:postgres@127.0.0.1:54322/postgres' -c 'select 1'
+```
+
+Internal Docker-network connectivity is preserved: Supabase services address the database as `db:5432` on the shared network, so only the host publication changes. Application configuration that uses `127.0.0.1:54322` continues to work. On Docker Desktop (macOS/Windows) the bridge option is reported not to restrict published ports; on Linux Docker Engine it does.
+
+## 6. Dependency licensing review (direct dependencies)
+
+- Frontend runtime: `react`, `react-dom` (MIT), `lucide-react` (ISC). No GPL/AGPL runtime dependency.
+- Backend direct dependencies: MIT/BSD/Apache-2.0, with one **LGPL-3.0-only** dependency: `psycopg` (PostgreSQL driver). It is installed unmodified from PyPI and dynamically imported, not vendored or statically linked. Anyone distributing a binary bundle that includes it must meet LGPL-3.0 obligations (license text and corresponding source availability). This is a distribution consideration, not an incompatibility with Apache-2.0.
+- `cryptography` is dual-licensed Apache-2.0 OR BSD-3-Clause; `pillow` is MIT-CMU; `reportlab` is BSD.
+- Fonts (Geist, Geist Mono, Inter) are loaded at runtime from Google Fonts under the SIL Open Font License; no font files are bundled. The bundled `frontend/public/vite.svg` is the Vite logo from the MIT-licensed Vite project.
+- No third-party copyright notices were modified. No NOTICE file was added: the repository vendors no third-party code requiring one.

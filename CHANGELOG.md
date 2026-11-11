@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CareerOS are documented here. Date-ordered; minor Towns.
+All notable changes to CareerOS are documented here. Date-ordered; minor releases.
 
 ## [3.1.0] — 2026-11-11 (unreleased)
 
@@ -10,11 +10,16 @@ All notable changes to CareerOS are documented here. Date-ordered; minor Towns.
 - `backend/ops/bootstrap.py` — idempotent schema initializer with `pgvector` extension guard and no-op-if-initialized.
 - `CAREEROS_BACKEND_PORT` / `CAREEROS_FRONTEND_PORT` overrides for the self-host Compose.
 - Public-repo hygiene: `SECURITY.md`, `CONTRIBUTING.md`, `docs/opensource-audit.md`.
+- Apache License 2.0 (`LICENSE`); `frontend/package.json` declares the same license.
 
 ### Changed
 - Never-inherited-iOS `SECRET_KEY` default removed; the signing secret is now env-provided only.
 - `.env.example` ships placeholder values only (never live credentials).
 - Compose files label projects `interniq/careeros`.
+- Local Supabase CLI port-binding guidance documented for loopback-only exposure.
+
+### Removed
+- Adzuna integration: connector, scheduler branch, UI credential fields, configuration variables, and default source entry. Existing `Adzuna` source rows are marked unsupported. Adzuna credentials exposed in Git history still require revocation in the provider portal; removing the integration does not revoke them.
 
 ### Fixed
 - First-run onboarding deadlock in production-mode self-host (token endpoint refused all mints until any candidate profile existed; it now allows minting until onboarding reaches completion).

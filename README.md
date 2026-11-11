@@ -90,6 +90,12 @@ Restore drills are documented in `docs/self-hosting.md` and exercised in `tests/
 - Frontend shows "CareerOS backend is temporarily unreachable" → `docker compose logs backend` and confirm `/api/ready` is `200`.
 - PostgreSQL migration `ERROR: type "vector" does not exist` → you ran a manual `psql CREATE TABLE` against the db before bootstrap; use the bundled compose flow instead.
 
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). Third-party
+dependencies retain their own licenses; the audit and dependency-license
+review are recorded in `docs/opensource-audit.md`.
+
 ## Not yet production-ready for your data
 
 Bring this offline community helm with care: review `SECURITY.md`, do not expose a self-hosted instance publicly without deliberate hardening, and rehearse a backup + restore before entrusting your personal data to it.
