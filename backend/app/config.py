@@ -49,7 +49,9 @@ class Settings(BaseSettings):
     RUN_MIGRATIONS: bool = os.getenv("CAREEROS_RUN_MIGRATIONS", "0").lower() in ("1", "true", "yes")
 
     # Security & Identity Resolution
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "careeros-secure-signing-secret-key-2026")
+    # No default ships: sign tokens only with an operator-provided 32+ char secret.
+    # Tests inject a synthetic secret via conftest.py.
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     INTERNAL_GATEWAY_SECRET: str = os.getenv("INTERNAL_GATEWAY_SECRET", "")
     AUTH_REQUIRED: bool = os.getenv(
         "AUTH_REQUIRED", 

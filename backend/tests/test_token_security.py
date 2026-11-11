@@ -147,6 +147,30 @@ def test_malformed_tokens_are_rejected():
 # =========================================================================
 # Security Test 7: Missing production secrets prevent startup
 # =========================================================================
+def test_shipped_secret_key_default_is_empty():
+    """No usable signing key may ship as a module default."""
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    env = {k: v for k, v in os.environ.items() if k != "SECRET_KEY"}
+    env["PYTHONPATH"] = str(repo_root)
+    out = subprocess.check_output(
+        [
+            sys.executable,
+            "-c",
+            "from backend.app.config import Settings; "
+            "print(Settings.model_fields['SECRET_KEY'].default)",
+        ],
+        cwd=repo_root,
+        env=env,
+        text=True,
+    ).strip()
+    assert out == ""
+
+
 def test_missing_production_secrets_prevent_startup():
     """In production, missing or weak default SECRET_KEY aborts startup with RuntimeError."""
     with patch.object(settings, "ENVIRONMENT", "production"):
