@@ -15,114 +15,19 @@ export const LINKS = {
   issues: `${REPOSITORY}/issues`,
 };
 
-export type FeatureVisual =
-  | 'discovery'
-  | 'tracking'
-  | 'resume'
-  | 'interviews'
-  | 'insights'
-  | 'ai';
+export const INSTALL_COMMANDS = `git clone https://github.com/chintu79/careeros.git
+cd careeros
+cp .env.example .env
+# set the three secrets from .env.example
+docker compose up -d --build`;
 
-export interface Feature {
-  id: string;
-  title: string;
-  body: string;
-  visual: FeatureVisual;
-  span: 'wide' | 'half' | 'third' | 'full';
-}
+export const HERO_WORDS = ['Your', 'career', 'deserves', 'a', 'command', 'center.'];
 
-export const FEATURES: Feature[] = [
-  {
-    id: 'discovery',
-    title: 'Opportunity discovery',
-    body: 'Greenhouse, Lever, Ashby, SmartRecruiters and more, normalized into one feed and ranked against your profile.',
-    visual: 'discovery',
-    span: 'wide',
-  },
-  {
-    id: 'tracking',
-    title: 'Application tracking',
-    body: 'Board, table, timeline and calendar over one record set. Every stage and follow-up stays in place.',
-    visual: 'tracking',
-    span: 'half',
-  },
-  {
-    id: 'resume',
-    title: 'Resume Studio',
-    body: 'A LaTeX master resume, tailored variants, PDF rebuild and an ATS-style quality audit.',
-    visual: 'resume',
-    span: 'third',
-  },
-  {
-    id: 'interviews',
-    title: 'Interview workflows',
-    body: 'Role-specific practice questions with local AI evaluation and a running prep journal.',
-    visual: 'interviews',
-    span: 'third',
-  },
-  {
-    id: 'insights',
-    title: 'Career insights',
-    body: 'Pipeline conversion, source efficacy and a Sankey view of where applications actually go.',
-    visual: 'insights',
-    span: 'third',
-  },
-  {
-    id: 'ai',
-    title: 'Optional AI assistance',
-    body: 'Groq or local Ollama. Matching, tracking and resume generation work with neither configured.',
-    visual: 'ai',
-    span: 'full',
-  },
-];
-
-export interface WalkthroughStage {
-  id: string;
-  index: string;
-  label: string;
-  title: string;
-  body: string;
-  bullets: string[];
-}
-
-export const STAGES: WalkthroughStage[] = [
-  {
-    id: 'discover',
-    index: '01',
-    label: 'Discover',
-    title: 'One feed, ranked by fit.',
-    body: 'Postings from ATS boards, public APIs and manual imports are normalized, deduplicated and scored against your profile.',
-    bullets: [
-      'Hybrid keyword and pgvector match scoring',
-      'Saved searches, ranking snapshots and source health',
-      'Eligibility, location and workplace filters',
-    ],
-  },
-  {
-    id: 'organize',
-    index: '02',
-    label: 'Organize',
-    title: 'Every application, one record.',
-    body: 'Move a role from saved to applied to interview without re-entering it, then work from the view that fits the task.',
-    bullets: [
-      'Kanban, table, timeline and calendar views',
-      'Follow-up drafts and interview scheduling',
-      'A prep journal attached to the role',
-    ],
-  },
-  {
-    id: 'progress',
-    index: '03',
-    label: 'Progress',
-    title: 'See what is converting.',
-    body: 'Response and interview rates by source, stage and role family, drawn from the applications you already track.',
-    bullets: [
-      'Pipeline conversion and career readiness',
-      'Source efficacy across every connector',
-      'A Sankey view of the whole search',
-    ],
-  },
-];
+// Every interactive demonstration below uses one shared fictional thread:
+// an illustrative backend intern opportunity at Linear, saved in Chapter 03,
+// tracked through the board in Chapter 04 and prepared for in Chapter 06.
+// Nothing here is a real person, account or application.
+export const SAMPLE_DATA_LABEL = 'Illustrative sample data';
 
 export const CREDIBILITY = [
   {
@@ -145,15 +50,6 @@ export const CREDIBILITY = [
     body: 'A written disclosure process and supported versions.',
     href: LINKS.security,
   },
-];
-
-export const STACK = [
-  { label: 'Frontend', value: 'React 18, TypeScript, Vite, Tailwind CSS' },
-  { label: 'Backend', value: 'FastAPI, SQLAlchemy, Python' },
-  { label: 'Database', value: 'PostgreSQL 17 with pgvector' },
-  { label: 'Deployment', value: 'Docker Compose, nginx, persistent volumes' },
-  { label: 'AI', value: 'Groq or Ollama, both optional' },
-  { label: 'Testing and CI', value: 'pytest, Vitest, GitHub Actions, secret scanning' },
 ];
 
 export const FAQ = [
@@ -189,10 +85,150 @@ export const FAQ = [
   },
 ];
 
-export const INSTALL_COMMANDS = `git clone https://github.com/chintu79/careeros.git
-cd careeros
-cp .env.example .env
-# set the three secrets from .env.example
-docker compose up -d --build`;
+export const STACK = [
+  { label: 'Frontend', value: 'React 18, TypeScript, Vite, Tailwind CSS' },
+  { label: 'Backend', value: 'FastAPI, SQLAlchemy, Python' },
+  { label: 'Database', value: 'PostgreSQL 17 with pgvector' },
+  { label: 'Deployment', value: 'Docker Compose, nginx, persistent volumes' },
+  { label: 'AI', value: 'Groq or Ollama, both optional' },
+  { label: 'Testing and CI', value: 'pytest, Vitest, GitHub Actions, secret scanning' },
+];
 
-export const HERO_WORDS = ['Your', 'career', 'deserves', 'a', 'command', 'center.'];
+export const CHAPTERS = [
+  { id: 'problem', index: '01', label: 'Scattered' },
+  { id: 'workspace', index: '02', label: 'Connected' },
+  { id: 'discover', index: '03', label: 'Discover' },
+  { id: 'track', index: '04', label: 'Track' },
+  { id: 'resume', index: '05', label: 'Resume' },
+  { id: 'interviews', index: '06', label: 'Interviews' },
+  { id: 'insights', index: '07', label: 'Insights' },
+  { id: 'open-source', index: '08', label: 'Open source' },
+] as const;
+
+/* ---------- Chapter sample data (all illustrative) ---------- */
+
+export interface Opportunity {
+  id: string;
+  company: string;
+  role: string;
+  meta: string;
+  location: string;
+  score: number;
+  source: string;
+  match: string[];
+}
+
+export const OPPORTUNITIES: Opportunity[] = [
+  {
+    id: 'linear',
+    company: 'Linear',
+    role: 'Backend Engineering Intern',
+    meta: 'Remote · Summer 2027',
+    location: 'Remote',
+    score: 92,
+    source: 'Greenhouse',
+    match: ['TypeScript', 'PostgreSQL', 'Systems'],
+  },
+  {
+    id: 'stripe',
+    company: 'Stripe',
+    role: 'Platform Engineering Intern',
+    meta: 'Bengaluru · 6 months',
+    location: 'Bengaluru',
+    score: 87,
+    source: 'Lever',
+    match: ['Infrastructure', 'Go', 'Kubernetes'],
+  },
+  {
+    id: 'notion',
+    company: 'Notion',
+    role: 'Product Engineer, New Grad',
+    meta: 'Hybrid · Full time',
+    location: 'Hybrid',
+    score: 81,
+    source: 'Ashby',
+    match: ['React', 'Product', 'SQL'],
+  },
+  {
+    id: 'vercel',
+    company: 'Vercel',
+    role: 'Developer Experience Intern',
+    meta: 'Remote · Winter 2027',
+    location: 'Remote',
+    score: 79,
+    source: 'SmartRecruiters',
+    match: ['Docs', 'Node.js', 'DX'],
+  },
+];
+
+export type PipelineStage = 'Saved' | 'Applied' | 'Assessment' | 'Interview' | 'Offer';
+
+export const PIPELINE_STAGES: PipelineStage[] = [
+  'Saved',
+  'Applied',
+  'Assessment',
+  'Interview',
+  'Offer',
+];
+
+export interface PipelineCard {
+  id: string;
+  company: string;
+  role: string;
+  stage: PipelineStage;
+  updated: string;
+  note: string;
+}
+
+export const INITIAL_PIPELINE: PipelineCard[] = [
+  { id: 'linear', company: 'Linear', role: 'Backend Engineering Intern', stage: 'Assessment', updated: 'Today', note: 'Take-home: rate-limiter' },
+  { id: 'stripe', company: 'Stripe', role: 'Platform Engineering Intern', stage: 'Interview', updated: 'Thu 14:00', note: 'System design round' },
+  { id: 'notion', company: 'Notion', role: 'Product Engineer', stage: 'Applied', updated: '4d ago', note: 'Recruiter screen pending' },
+  { id: 'vercel', company: 'Vercel', role: 'Developer Experience', stage: 'Saved', updated: '6d ago', note: 'Portfolio deck drafted' },
+];
+
+export const RESUME_BULLETS = [
+  {
+    id: 'tracing',
+    text: 'Instrumented p99-latency tracing for the ingest path during a student co-op; found a 400 ms lock wait.',
+    focus: true,
+  },
+  {
+    id: 'batch',
+    text: 'Replaced per-row writes with a batched queue; build time dropped from 9 minutes to 90 seconds.',
+    focus: true,
+  },
+  {
+    id: 'mentor',
+    text: 'Mentored two first-year contributors through their first merged pull requests.',
+    focus: false,
+  },
+];
+
+export const RESUME_SKILLS = ['TypeScript', 'PostgreSQL', 'FastAPI', 'Redis', 'Docker'];
+
+export const PREP_CHECKLIST = [
+  { id: 'system', label: 'Re-derive the token-bucket math out loud', minutes: 20 },
+  { id: 'story', label: 'Two stories: the 400 ms lock wait, and the ignored incident in chat', minutes: 25 },
+  { id: 'questions', label: 'Ask about the on-call rotation and migration from Kafka to NATS', minutes: 10 },
+];
+
+export const ACTIVITY = [
+  { date: 'Jun 3', label: 'Ranking snapshot: Linear, Backend Intern, score 92' },
+  { date: 'Jun 6', label: 'Tailored resume variant against the posting, audit 3 fixes' },
+  { date: 'Jun 9', label: 'Take-home submitted; 3 self-review questions logged' },
+  { date: 'Jun 12', label: 'Assessment passed; system design scheduled' },
+];
+
+export const FUNNEL = [
+  { label: 'Applied', value: 24, width: '100%' },
+  { label: 'Screen', value: 11, width: '72%' },
+  { label: 'Interview', value: 6, width: '48%' },
+  { label: 'Offer', value: 2, width: '24%' },
+];
+
+export const SOURCES = [
+  { label: 'Greenhouse', value: 14, width: '100%' },
+  { label: 'Lever', value: 9, width: '64%' },
+  { label: 'Ashby', value: 4, width: '29%' },
+];

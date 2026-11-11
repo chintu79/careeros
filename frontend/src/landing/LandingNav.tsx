@@ -4,8 +4,8 @@ import { Brand } from './Brand';
 import { LINKS } from './content';
 
 const PRODUCT_LINKS = [
-  { label: 'Product', href: '#product' },
-  { label: 'Features', href: '#features' },
+  { label: 'Product', href: '#workspace' },
+  { label: 'Discover', href: '#discover' },
   { label: 'Open source', href: '#open-source' },
   { label: 'Documentation', href: LINKS.docs, external: true },
   { label: 'GitHub', href: LINKS.repository, external: true },

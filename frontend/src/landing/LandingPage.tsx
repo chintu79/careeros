@@ -11,19 +11,25 @@ import {
 import { LandingNav } from './LandingNav';
 import { ProductFrame } from './ProductFrame';
 import { Reveal } from './Reveal';
-import { FeatureVisual } from './FeatureVisuals';
-import { Walkthrough } from './Walkthrough';
-import { Terminal } from './Terminal';
+import { ChapterProgress } from './ChapterProgress';
+import { ScatteredChapter } from './ScatteredChapter';
+import { ConnectedChapter } from './ConnectedChapter';
+import { DiscoverChapter } from './DiscoverChapter';
+import { TrackChapter } from './TrackChapter';
+import { ResumeChapter } from './ResumeChapter';
+import { InterviewChapter } from './InterviewChapter';
+import { InsightsChapter } from './InsightsChapter';
+import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
 import {
   CREDIBILITY,
   FAQ,
-  FEATURES,
   HERO_WORDS,
   LINKS,
   STACK,
 } from './content';
 import './landing.css';
+import './chapters.css';
 
 const CREDIBILITY_ICONS = [Scale, Container, GitPullRequest, ShieldCheck];
 
@@ -55,6 +61,7 @@ const LandingPage = () => {
   return (
     <div className="landing">
       <LandingNav />
+      <ChapterProgress />
 
       <main id="main">
         <section className="l-hero" aria-labelledby="hero-title">
@@ -79,7 +86,7 @@ const LandingPage = () => {
                 your career from one open-source workspace.
               </p>
               <div className="l-hero__actions">
-                <a className="l-button l-button--primary" href="#product">
+                <a className="l-button l-button--primary" href="#problem">
                   Explore CareerOS
                   <ArrowRight size={16} aria-hidden="true" />
                 </a>
@@ -132,87 +139,14 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section id="features" className="l-section" aria-labelledby="features-title">
-          <div className="l-container">
-            <Reveal className="l-section__head">
-              <h2 id="features-title" className="l-h2">
-                The whole search, in one workspace.
-              </h2>
-              <p className="l-lead">
-                Discovery, tracking, resumes and interview prep share the same data. A role
-                moves through the system once, and every view stays current.
-              </p>
-            </Reveal>
-
-            <div className="bento">
-              {FEATURES.map((feature) => (
-                <article
-                  key={feature.id}
-                  className={`bento-card bento-card--${feature.span}`}
-                >
-                  <div className="bento-card__copy">
-                    <h3 className="bento-card__title">{feature.title}</h3>
-                    <p className="bento-card__body">{feature.body}</p>
-                  </div>
-                  <div className="bento-card__visual">
-                    <FeatureVisual visual={feature.visual} />
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="product" className="l-section l-section--product" aria-labelledby="product-title">
-          <div className="l-container">
-            <Reveal className="l-section__head">
-              <h2 id="product-title" className="l-h2">
-                From first search to signed offer.
-              </h2>
-              <p className="l-lead">
-                Three stages, one record. Preview the workflow without creating an account or
-                touching a database.
-              </p>
-            </Reveal>
-            <Walkthrough />
-          </div>
-        </section>
-
-        <section id="open-source" className="l-section l-section--open" aria-labelledby="open-title">
-          <div className="l-container l-open">
-            <Reveal className="l-open__copy">
-              <h2 id="open-title" className="l-h2">
-                Open source, end to end.
-              </h2>
-              <p className="l-lead">
-                The backend, frontend, deployment files and tests are in the same repository
-                under Apache-2.0. There is no open-core gate and no hosted tier to upgrade to.
-              </p>
-              <ul className="l-check-list">
-                <li>Run the full stack with Docker Compose</li>
-                <li>Bring your own PostgreSQL, or use the bundled one</li>
-                <li>Keep AI optional: Groq or local Ollama</li>
-                <li>Read every migration, test and security note before you run it</li>
-              </ul>
-              <div className="l-open__links">
-                <a className="l-text-link" href={LINKS.license} target="_blank" rel="noreferrer">
-                  Read the license <ArrowUpRight size={14} aria-hidden="true" />
-                </a>
-                <a className="l-text-link" href={LINKS.contributing} target="_blank" rel="noreferrer">
-                  Contributing guide <ArrowUpRight size={14} aria-hidden="true" />
-                </a>
-              </div>
-            </Reveal>
-
-            <div className="l-open__terminal">
-              <Terminal />
-              <p className="l-note">
-                Backups are operator-run. The bundled scripts write unencrypted snapshots with
-                SHA-256 checksums, which verify integrity, not confidentiality.
-              </p>
-            </div>
-          </div>
-        </section>
+        <ScatteredChapter />
+        <ConnectedChapter />
+        <DiscoverChapter />
+        <TrackChapter />
+        <ResumeChapter />
+        <InterviewChapter />
+        <InsightsChapter />
+        <OpenSourceChapter />
 
         <section id="stack" className="l-section" aria-labelledby="stack-title">
           <div className="l-container">
@@ -304,8 +238,9 @@ const LandingPage = () => {
           </div>
           <nav className="l-footer__col" aria-label="Product">
             <h2 className="l-footer__heading">Product</h2>
-            <a href="#features">Features</a>
-            <a href="#product">Walkthrough</a>
+            <a href="#discover">Discover</a>
+            <a href="#track">Track</a>
+            <a href="#resume">Resume Studio</a>
             <a href="#faq">FAQ</a>
           </nav>
           <nav className="l-footer__col" aria-label="Resources">
