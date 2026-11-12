@@ -299,6 +299,14 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   flex-direction: column;
   gap: 8px;
   padding: 18px;
+  animation: l-detail-in 240ms var(--l-ease) both;
+}
+
+@keyframes l-detail-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
 }
 
 .demo__detail-company {
@@ -342,7 +350,7 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   gap: 10px;
 }
 
-.demo__save {
+.landing .demo__save {
   min-height: 36px;
   padding: 0 14px;
   border: 1px solid var(--l-violet-line);
@@ -369,20 +377,37 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   font-size: 0.75rem;
 }
 
-/* Ch01 — scattered to converged */
+/* Ch01 — scattered fragments orbit the centred record */
 .ch01 {
   min-height: clamp(600px, 92svh, 880px);
   display: flex;
   align-items: center;
 }
 
-.ch01 .l-chapter__grid {
+.ch01__stage {
   position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 540px;
+  width: 100%;
 }
 
-.ch-frag {
+.ch01__copy {
   position: relative;
-  min-height: 430px;
+  z-index: 1;
+  max-width: 680px;
+  text-align: center;
+}
+
+.ch01__copy .l-lead,
+.ch01__copy .l-chapter__note {
+  margin-inline: auto;
+}
+
+.ch01__orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
 .ch-frag-item {
@@ -428,57 +453,13 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   white-space: nowrap;
 }
 
-.ch-f1 { top: 2%; left: 4%; }
-.ch-f2 { top: 2%; right: 4%; }
-.ch-f3 { top: 30%; left: 0; }
-.ch-f4 { top: 34%; right: 0; }
-.ch-f5 { top: 58%; left: 8%; }
-.ch-f6 { top: 56%; right: 5%; }
-.ch-f7 { bottom: 14%; left: 36%; }
-
-.ch-hub {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  width: min(212px, 52%);
-  padding: 18px 16px;
-  border: 1px solid var(--l-violet-line);
-  border-radius: 14px;
-  background: var(--l-violet-panel);
-  text-align: center;
-  transform: translate(-50%, -50%);
-}
-
-.ch-hub__mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--l-violet-line);
-  border-radius: 12px;
-  background: var(--l-violet-panel-strong);
-  color: var(--l-violet);
-}
-
-.ch-hub__label {
-  color: var(--l-ink);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.ch-hub-caption {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: max-content;
-  max-width: 100%;
-  color: var(--l-muted);
-  font-size: 0.75rem;
-  transform: translateX(-50%);
-}
+.ch-f1 { top: 4%; left: 2%; }
+.ch-f2 { top: 0; right: 4%; }
+.ch-f3 { top: 24%; right: 0; }
+.ch-f4 { top: 58%; right: 2%; }
+.ch-f5 { bottom: 4%; right: 16%; }
+.ch-f6 { bottom: 0; left: 10%; }
+.ch-f7 { top: 38%; left: 0; }
 
 /* Ch02 — connected workspace */
 .ch02__head {
@@ -611,6 +592,58 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   text-align: center;
 }
 
+.ch02__threads {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  pointer-events: none;
+  mask-image: radial-gradient(ellipse 78% 62% at 50% 40%, black 0%, transparent 78%);
+}
+
+.ch02__threads > div {
+  width: 100%;
+  height: 100%;
+}
+
+.ch02__head,
+.ch02__grid,
+.ch02__sample {
+  position: relative;
+  z-index: 1;
+}
+
+/* Pointer spotlight: one delegated handler writes --spot-x/--spot-y. */
+.board,
+.resume,
+.interview,
+.insights,
+.ch02__frame,
+.demo {
+  position: relative;
+}
+
+.demo::after,
+.ch02__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, 0%),
+    var(--l-violet-wash),
+    transparent 68%
+  );
+  opacity: 0;
+  transition: opacity 240ms var(--l-ease);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.demo:hover::after,
+.ch02__frame:hover::after {
+  opacity: 0.8;
+}
+
 /* Ch04 — board */
 .board {
   min-width: 0;
@@ -738,6 +771,7 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
 .board__card-updated {
   color: var(--l-ui-4);
   font-size: 0.625rem;
+  white-space: nowrap;
 }
 
 .board__move {
@@ -745,7 +779,7 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   gap: 4px;
 }
 
-.board__move-button {
+.landing .board__move-button {
   display: grid;
   place-items: center;
   width: 20px;
@@ -755,13 +789,13 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   color: var(--l-ui-4);
 }
 
-.board__move-button:hover:not(:disabled),
-.board__move-button:focus-visible:not(:disabled) {
+.landing .board__move-button:hover:not(:disabled),
+.landing .board__move-button:focus-visible:not(:disabled) {
   border-color: var(--l-violet-line);
   color: var(--l-violet);
 }
 
-.board__move-button:disabled {
+.landing .board__move-button:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
@@ -888,7 +922,7 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   outline-offset: 2px;
 }
 
-.resume__skill {
+.landing .resume__skill {
   min-height: 30px;
   padding: 0 11px;
   border: 1px solid var(--l-rule-soft);
@@ -898,11 +932,11 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   transition: color 160ms var(--l-ease), border-color 160ms var(--l-ease), background-color 160ms var(--l-ease);
 }
 
-.resume__skill:hover {
+.landing .resume__skill:hover {
   color: var(--l-ink);
 }
 
-.resume__skill.is-active {
+.landing .resume__skill.is-active {
   border-color: var(--l-violet-line);
   background: var(--l-violet-panel);
   color: var(--l-violet);
@@ -978,6 +1012,14 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   list-style: disc;
   font-size: 0.75rem;
   line-height: 1.45;
+  animation: l-bullet-in 280ms var(--l-ease) both;
+}
+
+@keyframes l-bullet-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
 }
 
 .resume__none {
@@ -1120,14 +1162,27 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
 }
 
 .interview__timeline {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0;
   margin: 14px 16px 16px;
   border-top: 1px solid var(--l-rule-soft);
   padding-top: 14px;
-  padding-left: 0;
+  padding-left: 14px;
   list-style: none;
+}
+
+.interview__timeline::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  bottom: 12px;
+  left: 2px;
+  width: 1px;
+  background: linear-gradient(var(--l-violet-line-strong), var(--l-rule-soft));
+  transform: scaleY(var(--spine, 1));
+  transform-origin: top center;
 }
 
 .interview__timeline li {
@@ -1290,13 +1345,25 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
     padding-block: clamp(64px, 10vw, 96px);
   }
 
-  .ch-frag {
+  .ch01__stage {
+    display: block;
+    min-height: 0;
+  }
+
+  .ch01__copy {
+    max-width: 640px;
+    margin-inline: auto;
+  }
+
+  .ch01__orbit {
+    position: static;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-content: center;
     justify-content: center;
     min-height: 0;
+    margin-top: 30px;
     padding-block: 10px;
   }
 
@@ -1304,21 +1371,6 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
     position: static;
     max-width: 200px;
     transform: none !important;
-  }
-
-  .ch-hub {
-    position: static;
-    transform: none;
-    width: min(240px, 100%);
-    margin-top: 8px;
-  }
-
-  .ch-hub-caption {
-    position: static;
-    transform: none;
-    width: 100%;
-    margin-top: 6px;
-    text-align: center;
   }
 
   .ch02__grid {
@@ -1352,8 +1404,8 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
 }
 
 @media (max-width: 720px) {
-  .ch-frag {
-    min-height: 430px;
+  .ch01__orbit {
+    min-height: 0;
   }
 
   .demo__split {
@@ -1410,6 +1462,15 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .resume__bullet-list,
+  .demo__detail {
+    animation: none !important;
+  }
+
+  .demo::after,
+  .ch02__frame::after {
+    display: none;
+  }
   .l-chapters__dot,
   .l-chapters__label,
   .l-chapters__num,

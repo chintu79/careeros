@@ -1,4 +1,4 @@
-import { Fragment, useEffect } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -22,7 +22,11 @@ import { InterviewChapter } from './InterviewChapter';
 import { InsightsChapter } from './InsightsChapter';
 import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
+import { Magnetic } from './fx/Magnetic';
+import { LaserFlow } from './fx/LaserFlow';
+import { withScrollScene, gsap } from './motion';
 import {
+  AUTHOR,
   CREDIBILITY,
   FAQ,
   HERO_WORDS,
@@ -42,6 +46,9 @@ const GitHubMark = ({ size = 16 }: { size?: number }) => (
 );
 
 const LandingPage = () => {
+  const page = useRef<HTMLDivElement | null>(null);
+  const heroFrame = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
     const previousTitle = document.title;
     const meta = document.querySelector('meta[name="description"]');
@@ -59,8 +66,66 @@ const LandingPage = () => {
     };
   }, []);
 
+  useEffect(
+    () =>
+      withScrollScene(page.current, () => {
+        const stack = page.current?.querySelector('#stack');
+        const faq = page.current?.querySelector('#faq');
+        const footer = page.current?.querySelector('.l-footer');
+
+        gsap.from('.l-stack__row', {
+          opacity: 0,
+          y: 14,
+          duration: 0.45,
+          stagger: 0.06,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: stack, start: 'top 74%' },
+        });
+        gsap.from('.l-faq__head > *', {
+          opacity: 0,
+          y: 16,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: faq, start: 'top 74%' },
+        });
+        gsap.from('.l-faq__item', {
+          opacity: 0,
+          y: 12,
+          duration: 0.4,
+          stagger: 0.05,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: faq, start: 'top 70%' },
+        });
+        gsap.from('.l-close__inner > *', {
+          opacity: 0,
+          y: 22,
+          duration: 0.55,
+          stagger: 0.1,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.l-close', start: 'top 76%' },
+        });
+        gsap.from('.l-footer__grid > *', {
+          opacity: 0,
+          y: 16,
+          duration: 0.45,
+          stagger: 0.08,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: footer, start: 'top 92%' },
+        });
+        gsap.from('.l-footer__wordmark', {
+          opacity: 0,
+          y: 24,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: footer, start: 'top 88%' },
+        });
+      }),
+    [],
+  );
+
   return (
-    <div className="landing">
+    <div className="landing" ref={page}>
       <LandingNav />
       <ChapterProgress />
 
@@ -109,7 +174,29 @@ const LandingPage = () => {
             </div>
 
             <div className="l-hero__visual">
-              <ProductFrame />
+              <div className="l-hero__stage">
+                <LaserFlow
+                  className="l-hero__laser"
+                  surfaceRef={heroFrame}
+                  beamPosition={0.68}
+                  color="#b7a1ff"
+                  intensity={1.25}
+                  beamWidth={1.2}
+                  flare={1.2}
+                  spread={1.2}
+                  spill={0.4}
+                  fog={0.04}
+                  dust={0.9}
+                  streaks={1}
+                  dots={0.6}
+                  pulse={1.1}
+                  speed={1}
+                  mouseInteraction
+                />
+                <div className="l-hero__frame" ref={heroFrame}>
+                  <ProductFrame />
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -208,10 +295,12 @@ const LandingPage = () => {
               </p>
             </div>
             <div className="l-close__actions">
-              <a className="l-button l-button--primary" href="/">
-                <Sparkles size={16} aria-hidden="true" />
-                Get started
-              </a>
+              <Magnetic>
+                <a className="l-button l-button--primary" href="/">
+                  <Sparkles size={16} aria-hidden="true" />
+                  Get started
+                </a>
+              </Magnetic>
               <a
                 className="l-button l-button--secondary"
                 href={LINKS.docs}
@@ -236,6 +325,20 @@ const LandingPage = () => {
               Open-source career intelligence. Self-hosted, single-tenant and built to be
               inspected.
             </p>
+            <p className="l-footer__maker">
+              Designed and built by{' '}
+              <a href={AUTHOR.github} target="_blank" rel="noreferrer">
+                {AUTHOR.name}
+              </a>
+              <span className="l-footer__place">{AUTHOR.location}</span>
+            </p>
+            <div className="l-footer__contact">
+              <a href={`mailto:${AUTHOR.email}`}>Email</a>
+              <span aria-hidden="true">/</span>
+              <a href={AUTHOR.github} target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+            </div>
           </div>
           <nav className="l-footer__col" aria-label="Product">
             <h2 className="l-footer__heading">Product</h2>
@@ -271,6 +374,9 @@ const LandingPage = () => {
               Contributing
             </a>
           </nav>
+        </div>
+        <div className="l-footer__wordmark" aria-hidden="true">
+          CareerOS
         </div>
         <div className="l-container l-footer__bottom">
           <span>Apache-2.0</span>

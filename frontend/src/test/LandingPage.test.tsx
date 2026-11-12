@@ -121,4 +121,19 @@ describe('LandingPage', () => {
     expect(items.length).toBe(6);
     expect(screen.getByText('Is CareerOS free and open source?')).toBeInTheDocument();
   });
+
+  it('credits the author in the footer', () => {
+    const { container } = render(<LandingPage />);
+    const footer = container.querySelector('.l-footer') as HTMLElement;
+    const scope = within(footer);
+
+    expect(scope.getByRole('link', { name: 'Shreekrishna Chinta' })).toHaveAttribute(
+      'href',
+      'https://github.com/chintu79',
+    );
+    expect(scope.getByRole('link', { name: 'Email' })).toHaveAttribute(
+      'href',
+      'mailto:shrikrishnachinta79@gmail.com',
+    );
+  });
 });

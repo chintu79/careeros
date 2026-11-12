@@ -29,6 +29,13 @@ export const HERO_WORDS = ['Your', 'career', 'deserves', 'a', 'command', 'center
 // Nothing here is a real person, account or application.
 export const SAMPLE_DATA_LABEL = 'Illustrative sample data';
 
+export const AUTHOR = {
+  name: 'Shreekrishna Chinta',
+  github: 'https://github.com/chintu79',
+  email: 'shrikrishnachinta79@gmail.com',
+  location: 'Pune, India',
+};
+
 export const CREDIBILITY = [
   {
     title: 'Apache-2.0',

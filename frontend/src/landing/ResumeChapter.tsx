@@ -1,15 +1,54 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, FileText } from 'lucide-react';
 import { RESUME_BULLETS, RESUME_SKILLS } from './content';
+import { gsap, prefersReducedMotion, withScrollScene } from './motion';
 
 const ALL_BULLETS = Object.fromEntries(RESUME_BULLETS.map((bullet) => [bullet.id, bullet.focus]));
 
 export const ResumeChapter = () => {
+  const scope = useRef<HTMLElement | null>(null);
+  const preview = useRef<HTMLDivElement | null>(null);
+  const mounted = useRef(false);
   const [name, setName] = useState('A. Khan');
   const [headline, setHeadline] = useState('Computer Science, third year');
   const [selectedBullets, setSelectedBullets] = useState<Record<string, boolean>>(ALL_BULLETS);
   const [skills, setSkills] = useState<string[]>(['TypeScript', 'PostgreSQL']);
   const [tailored, setTailored] = useState(false);
+
+  useEffect(
+    () =>
+      withScrollScene(scope.current, () => {
+        gsap.from('.resume__editor', {
+          opacity: 0,
+          x: -18,
+          duration: 0.5,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 66%' },
+        });
+        gsap.from('.resume__preview', {
+          opacity: 0,
+          x: 18,
+          duration: 0.5,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 66%' },
+        });
+      }),
+    [],
+  );
+
+  // The preview pulses once when the master is swapped for the tailored variant.
+  useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    if (!preview.current || prefersReducedMotion()) return;
+    gsap.fromTo(
+      preview.current,
+      { opacity: 0.55, y: 6 },
+      { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+    );
+  }, [tailored]);
 
   const activeBullets = RESUME_BULLETS.filter((bullet) => selectedBullets[bullet.id]);
   const toggleBullet = (id: string) =>
@@ -20,7 +59,7 @@ export const ResumeChapter = () => {
     );
 
   return (
-    <section id="resume" className="l-chapter" aria-labelledby="resume-title">
+    <section id="resume" ref={scope} className="l-chapter" aria-labelledby="resume-title">
       <div className="l-container l-chapter__grid">
         <div className="l-chapter__copy">
           <h2 id="resume-title" className="l-h2">
@@ -106,7 +145,7 @@ export const ResumeChapter = () => {
               </button>
             </div>
 
-            <div className="resume__preview" aria-hidden="true">
+            <div className="resume__preview" ref={preview} aria-hidden="true">
               <div className="resume__sheet">
                 <p className="resume__name">{name || 'Your name'}</p>
                 <p className="resume__headline">{headline}</p>
@@ -117,7 +156,10 @@ export const ResumeChapter = () => {
                 )}
                 <div className="resume__section">
                   <p className="resume__section-title">Experience</p>
-                  <ul className="resume__bullet-list">
+                  <ul
+                    className="resume__bullet-list"
+                    key={activeBullets.map((bullet) => bullet.id).join('-') || 'empty'}
+                  >
                     {activeBullets.map((bullet) => (
                       <li key={bullet.id}>{bullet.text}</li>
                     ))}

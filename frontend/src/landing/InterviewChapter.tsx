@@ -1,11 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, MessagesSquare } from 'lucide-react';
 import { PREP_CHECKLIST } from './content';
+import { gsap, withScrollScene } from './motion';
 
 export const InterviewChapter = () => {
+  const scope = useRef<HTMLElement | null>(null);
   const [done, setDone] = useState<ReadonlySet<string>>(() => new Set());
   const total = PREP_CHECKLIST.length;
   const finished = done.size;
+
+  useEffect(
+    () =>
+      withScrollScene(scope.current, () => {
+        gsap.from('.interview__context', {
+          opacity: 0,
+          y: 14,
+          duration: 0.45,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 68%' },
+        });
+        gsap.from('.interview__item', {
+          opacity: 0,
+          y: 10,
+          duration: 0.35,
+          stagger: 0.06,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 66%' },
+        });
+        gsap.from('.interview__timeline li', {
+          opacity: 0,
+          x: -10,
+          duration: 0.35,
+          stagger: 0.1,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 62%' },
+        });
+        gsap.fromTo(
+          '.interview__timeline',
+          { '--spine': 0 },
+          {
+            '--spine': 1,
+            duration: 0.9,
+            ease: 'power2.out',
+            scrollTrigger: { trigger: scope.current, start: 'top 62%' },
+          },
+        );
+      }),
+    [],
+  );
 
   const toggle = (id: string) =>
     setDone((current) => {
@@ -16,7 +58,7 @@ export const InterviewChapter = () => {
     });
 
   return (
-    <section id="interviews" className="l-chapter" aria-labelledby="interviews-title">
+    <section id="interviews" ref={scope} className="l-chapter" aria-labelledby="interviews-title">
       <div className="l-container l-chapter__grid">
         <div className="l-chapter__copy">
           <h2 id="interviews-title" className="l-h2">

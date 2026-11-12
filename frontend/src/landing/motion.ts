@@ -1,14 +1,15 @@
 import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, Flip);
 
 export const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export { gsap, ScrollTrigger };
+export { gsap, Flip, ScrollTrigger };
 
 /**
  * Wire a chapter's scroll scene inside a gsap context. The context owns every

@@ -9,6 +9,14 @@ export const InsightsChapter = () => {
   useEffect(
     () =>
       withScrollScene(scope.current, () => {
+        gsap.from('.insights__row', {
+          opacity: 0,
+          y: 10,
+          duration: 0.35,
+          stagger: 0.05,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 70%' },
+        });
         gsap.from('.insights__bar', {
           scaleX: 0,
           transformOrigin: 'left center',
@@ -16,6 +24,32 @@ export const InsightsChapter = () => {
           ease: 'power2.out',
           stagger: 0.09,
           scrollTrigger: { trigger: scope.current, start: 'top 68%' },
+        });
+        gsap.from('.insights__activity li', {
+          opacity: 0,
+          x: 12,
+          duration: 0.35,
+          stagger: 0.08,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 64%' },
+        });
+        // Count the funnel and source figures up once, on entry.
+        gsap.utils.toArray<HTMLElement>('.insights__value', scope.current).forEach((node) => {
+          const target = Number.parseInt(node.textContent ?? '', 10);
+          if (!Number.isFinite(target)) return;
+          const counter = { value: 0 };
+          gsap.to(counter, {
+            value: target,
+            duration: 0.9,
+            ease: 'power2.out',
+            onUpdate: () => {
+              node.textContent = String(Math.round(counter.value));
+            },
+            onComplete: () => {
+              node.textContent = String(target);
+            },
+            scrollTrigger: { trigger: scope.current, start: 'top 70%' },
+          });
         });
       }),
     [],

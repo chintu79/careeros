@@ -1,17 +1,59 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, NotebookPen } from 'lucide-react';
 import { INITIAL_PIPELINE, PIPELINE_STAGES, type PipelineCard, type PipelineStage } from './content';
+import { Flip, gsap, prefersReducedMotion, withScrollScene } from './motion';
 
 const stageIndex = (stage: PipelineStage) => PIPELINE_STAGES.indexOf(stage);
 
 export const TrackChapter = () => {
+  const scope = useRef<HTMLElement | null>(null);
+  const board = useRef<HTMLDivElement | null>(null);
+  const pendingFlip = useRef<ReturnType<typeof Flip.getState> | null>(null);
   const [cards, setCards] = useState<PipelineCard[]>(INITIAL_PIPELINE);
   const [selectedId, setSelectedId] = useState('linear');
 
   const selected = cards.find((card) => card.id === selectedId) ?? cards[0];
   const progress = selected ? (stageIndex(selected.stage) / (PIPELINE_STAGES.length - 1)) * 100 : 0;
 
+  useEffect(
+    () =>
+      withScrollScene(scope.current, () => {
+        gsap.from('.board', {
+          opacity: 0,
+          y: 24,
+          duration: 0.55,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 66%' },
+        });
+        gsap.from('.board__column', {
+          opacity: 0,
+          y: 14,
+          duration: 0.4,
+          stagger: 0.07,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: scope.current, start: 'top 66%' },
+        });
+      }),
+    [],
+  );
+
+  // Flip the moved card between columns; reduced motion and jsdom (no
+  // matchMedia) keep the plain re-render.
+  useEffect(() => {
+    const state = pendingFlip.current;
+    if (!state) return;
+    pendingFlip.current = null;
+    Flip.from(state, { duration: 0.45, ease: 'power2.out' });
+  }, [cards]);
+
   const move = (id: string, direction: 1 | -1) => {
+    if (
+      board.current &&
+      typeof window.matchMedia === 'function' &&
+      !prefersReducedMotion()
+    ) {
+      pendingFlip.current = Flip.getState(board.current.querySelectorAll('.board__card'));
+    }
     setCards((current) =>
       current.map((card) => {
         if (card.id !== id) return card;
@@ -25,7 +67,7 @@ export const TrackChapter = () => {
   };
 
   return (
-    <section id="track" className="l-chapter" aria-labelledby="track-title">
+    <section id="track" ref={scope} className="l-chapter" aria-labelledby="track-title">
       <div className="l-container l-chapter__grid">
         <div className="l-chapter__copy">
           <h2 id="track-title" className="l-h2">
@@ -42,7 +84,7 @@ export const TrackChapter = () => {
           </ul>
         </div>
 
-        <div className="board" aria-label="Illustrative application board demonstration">
+        <div className="board" ref={board} aria-label="Illustrative application board demonstration">
           <div className="board__bar">
             <span className="board__title">Pipeline</span>
             <span className="demo__chip demo__chip--quiet">Illustrative</span>

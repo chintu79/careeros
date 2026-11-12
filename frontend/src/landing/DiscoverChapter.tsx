@@ -1,14 +1,40 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Compass, SlidersHorizontal } from 'lucide-react';
 import { OPPORTUNITIES } from './content';
+import { withScrollScene, gsap } from './motion';
+import { trackSpotlight } from './fx/Spotlight';
 
 const FILTERS = ['All', 'Remote', '80+ match'] as const;
 type Filter = (typeof FILTERS)[number];
 
 export const DiscoverChapter = () => {
+  const scope = useRef<HTMLElement | null>(null);
   const [filter, setFilter] = useState<Filter>('All');
   const [activeId, setActiveId] = useState('linear');
   const [saved, setSaved] = useState<ReadonlySet<string>>(() => new Set(['linear']));
+
+  useEffect(
+    () =>
+      withScrollScene(scope.current, () => {
+        gsap.from('.demo', {
+          opacity: 0,
+          y: 26,
+          scale: 0.985,
+          duration: 0.6,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.demo', start: 'top 78%' },
+        });
+        gsap.from('.demo__opp', {
+          opacity: 0,
+          x: 14,
+          duration: 0.4,
+          stagger: 0.07,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.demo', start: 'top 74%' },
+        });
+      }),
+    [],
+  );
 
   const opportunities = useMemo(
     () =>
@@ -33,7 +59,7 @@ export const DiscoverChapter = () => {
   };
 
   return (
-    <section id="discover" className="l-chapter" aria-labelledby="discover-title">
+    <section id="discover" ref={scope} className="l-chapter" aria-labelledby="discover-title">
       <div className="l-container l-chapter__grid">
         <div className="l-chapter__copy">
           <h2 id="discover-title" className="l-h2">
@@ -50,7 +76,11 @@ export const DiscoverChapter = () => {
           </ul>
         </div>
 
-        <div className="demo" aria-label="Illustrative opportunity feed demonstration">
+        <div
+          className="demo"
+          aria-label="Illustrative opportunity feed demonstration"
+          onPointerMove={trackSpotlight}
+        >
           <div className="demo__bar">
             <span className="demo__title">
               <Compass size={13} aria-hidden="true" />
@@ -98,7 +128,7 @@ export const DiscoverChapter = () => {
             </div>
 
             {active ? (
-              <div className="demo__detail" aria-live="polite">
+              <div className="demo__detail" key={active.id} aria-live="polite">
                 <p className="demo__detail-company">{active.company}</p>
                 <p className="demo__detail-role">{active.role}</p>
                 <p className="demo__detail-meta">
