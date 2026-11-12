@@ -78,7 +78,6 @@ export const ProductFrame = () => (
         <div className="pf__main">
           <div className="pf__head">
             <div>
-              <p className="pf__kicker">Snapshot</p>
               <p className="pf__title">Overview</p>
             </div>
             <span className="pf__ask">

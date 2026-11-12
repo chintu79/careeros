@@ -1,27 +1,15 @@
-import {
-  Compass,
-  FileText,
-  MessagesSquare,
-  SquareKanban,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
 import { ProductFrame } from './ProductFrame';
 import { withScrollScene, gsap } from './motion';
-import WebThreads from './fx/WebThreads';
 import { trackSpotlight } from './fx/Spotlight';
 import { useEffect, useRef } from 'react';
 
-const MODULES_LEFT = [
-  { href: '#discover', icon: Compass, label: 'Discover opportunities', body: 'Ranked against your profile' },
-  { href: '#track', icon: SquareKanban, label: 'Track applications', body: 'One record, every stage' },
-  { href: '#resume', icon: FileText, label: 'Resume Studio', body: 'LaTeX master, tailored variants' },
-];
-const MODULES_RIGHT = [
-  { href: '#interviews', icon: MessagesSquare, label: 'Interview workflows', body: 'Prep attached to the role' },
-  { href: '#insights', icon: TrendingUp, label: 'Career insights', body: 'Funnel, sources, activity' },
-  { href: '#interviews', icon: Sparkles, label: 'Optional AI assistance', body: 'Groq or local Ollama, never required' },
-];
+const STEPS = [
+  { index: '01', href: '#discover', name: 'Discover', caption: 'One posted role becomes a record' },
+  { index: '02', href: '#track', name: 'Track', caption: 'Stages without the spreadsheet' },
+  { index: '03', href: '#resume', name: 'Resume Studio', caption: 'A master LaTeX entry, tailored' },
+  { index: '04', href: '#interviews', name: 'Interviews', caption: 'Prep attached to the role' },
+  { index: '05', href: '#insights', name: 'Insights', caption: 'A funnel you can actually read' },
+] as const;
 
 export const ConnectedChapter = () => {
   const scope = useRef<HTMLElement | null>(null);
@@ -35,68 +23,41 @@ export const ConnectedChapter = () => {
           duration: 0.5,
           stagger: 0.08,
           ease: 'power2.out',
-          scrollTrigger: { trigger: scope.current, start: 'top 68%' },
+          scrollTrigger: { trigger: scope.current, start: 'top 70%' },
+        });
+        // The record trail draws itself once on entry; the nodes resolve along it.
+        gsap.fromTo(
+          '.ch02__path-fill',
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            duration: 1.1,
+            ease: 'power2.inOut',
+            scrollTrigger: { trigger: '.ch02__steps', start: 'top 78%' },
+          },
+        );
+        gsap.from('.ch02__step', {
+          opacity: 0,
+          y: 10,
+          duration: 0.4,
+          stagger: 0.14,
+          ease: 'power2.out',
+          scrollTrigger: { trigger: '.ch02__steps', start: 'top 76%' },
         });
         gsap.from('.ch02__frame', {
           opacity: 0,
-          y: 24,
+          y: 26,
           scale: 0.97,
           duration: 0.6,
           ease: 'power2.out',
-          scrollTrigger: { trigger: scope.current, start: 'top 62%' },
-        });
-        gsap.from('.ch02__module', {
-          opacity: 0,
-          y: 14,
-          duration: 0.4,
-          stagger: 0.12,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: scope.current, start: 'top 62%' },
-        });
-        gsap.from('.ch02__link', {
-          scaleX: 0,
-          transformOrigin: 'center',
-          duration: 0.34,
-          stagger: 0.12,
-          ease: 'power2.out',
-          scrollTrigger: { trigger: scope.current, start: 'top 62%' },
+          scrollTrigger: { trigger: '.ch02__framewrap', start: 'top 80%' },
         });
       }),
     [],
   );
 
-  const renderModule = (module: { href: string; icon: typeof Compass; label: string; body: string }) => {
-    const Icon = module.icon;
-    return (
-      <a key={module.label} href={module.href} className="ch02__module">
-        <span className="ch02__link" aria-hidden="true" />
-        <span className="ch02__module-icon">
-          <Icon size={15} strokeWidth={1.7} aria-hidden="true" />
-        </span>
-        <span className="ch02__module-copy">
-          <span className="ch02__module-label">{module.label}</span>
-          <span className="ch02__module-body">{module.body}</span>
-        </span>
-      </a>
-    );
-  };
-
   return (
     <section id="workspace" ref={scope} className="l-chapter ch02" aria-labelledby="workspace-title">
-      <div className="ch02__threads" aria-hidden="true">
-        <WebThreads
-          colors={['#7c3aed', '#b7a1ff']}
-          coreColor="#efeaff"
-          threadCount={7}
-          speed={0.16}
-          glow={0.03}
-          brightness={0.55}
-          opacity={0.6}
-          pulses={1}
-          fade={0.25}
-        />
-      </div>
-
       <div className="l-container ch02__head">
         <h2 id="workspace-title" className="l-h2">
           Everything starts making sense when it works together.
@@ -107,16 +68,31 @@ export const ConnectedChapter = () => {
         </p>
       </div>
 
-      <div className="l-container ch02__grid">
-        <div className="ch02__col ch02__col--left">{MODULES_LEFT.map(renderModule)}</div>
-        <div className="ch02__center">
+      <div className="l-container ch02__scene">
+        <div className="ch02__rail" aria-hidden="true">
+          <span className="ch02__path-fill" />
+        </div>
+        <ol className="ch02__steps" aria-label="The CareerOS record trail">
+          {STEPS.map((step) => (
+            <li key={step.index} className="ch02__step">
+              <a className="ch02__step-link" href={step.href}>
+                <span className="ch02__dot" aria-hidden="true" />
+                <span className="ch02__step-index">{step.index}</span>
+                <span className="ch02__step-name">{step.name}</span>
+                <span className="ch02__step-caption">{step.caption}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+
+        <div className="ch02__framewrap">
           <div className="ch02__frame" onPointerMove={trackSpotlight}>
             <ProductFrame />
           </div>
-          <p className="ch02__caption">The workspace: one record per role, ranked and current.</p>
         </div>
-        <div className="ch02__col ch02__col--right">{MODULES_RIGHT.map(renderModule)}</div>
       </div>
+
+      <p className="l-container ch02__caption">One record, kept current. Linear, Backend Engineering Intern, score 92.</p>
       <p className="l-container ch02__sample">Product frame: illustrative sample, not real account data.</p>
     </section>
   );

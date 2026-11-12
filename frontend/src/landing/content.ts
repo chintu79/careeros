@@ -21,8 +21,6 @@ cp .env.example .env
 # set the three secrets from .env.example
 docker compose up -d --build`;
 
-export const HERO_WORDS = ['Your', 'career', 'deserves', 'a', 'command', 'center.'];
-
 // Every interactive demonstration below uses one shared fictional thread:
 // an illustrative backend intern opportunity at Linear, saved in Chapter 03,
 // tracked through the board in Chapter 04 and prepared for in Chapter 06.
@@ -94,13 +92,55 @@ export const FAQ = [
   },
 ];
 
-export const STACK = [
-  { label: 'Frontend', value: 'React 18, TypeScript, Vite, Tailwind CSS' },
-  { label: 'Backend', value: 'FastAPI, SQLAlchemy, Python' },
-  { label: 'Database', value: 'PostgreSQL 17 with pgvector' },
-  { label: 'Deployment', value: 'Docker Compose, nginx, persistent volumes' },
-  { label: 'AI', value: 'Groq or Ollama, both optional' },
-  { label: 'Testing and CI', value: 'pytest, Vitest, GitHub Actions, secret scanning' },
+export interface StackLayer {
+  index: string;
+  name: string;
+  items: string[];
+  note: string;
+}
+
+// Presentation → Delivery. Integration claims stay honest:
+// Groq, Ollama, GitHub and Calendar are optional; Adzuna was retired in v3.1.0.
+export const STACK_LAYERS: StackLayer[] = [
+  {
+    index: '01',
+    name: 'Presentation',
+    items: ['React 18', 'TypeScript', 'Vite', 'Tailwind CSS'],
+    note: 'One responsive client for every workspace screen.',
+  },
+  {
+    index: '02',
+    name: 'Service',
+    items: ['FastAPI', 'SQLAlchemy', 'Python'],
+    note: 'Deterministic paths work with no AI provider configured.',
+  },
+  {
+    index: '03',
+    name: 'Data',
+    items: ['PostgreSQL 17', 'pgvector'],
+    note: 'Semantic retrieval over the records you own.',
+  },
+  {
+    index: '04',
+    name: 'Integrations',
+    items: [
+      'Greenhouse',
+      'Lever',
+      'Ashby',
+      'SmartRecruiters',
+      'Remotive',
+      'Remote OK',
+      'RSS feeds',
+      'Manual import',
+    ],
+    note: 'Optional: Groq or Ollama for AI, GitHub, Google Calendar. Adzuna retired in v3.1.0.',
+  },
+  {
+    index: '05',
+    name: 'Delivery',
+    items: ['Docker Compose', 'nginx', 'persistent volumes', 'pytest', 'Vitest', 'GitHub Actions'],
+    note: 'Single-tenant, Compose-first, CI on every pull request.',
+  },
 ];
 
 export const CHAPTERS = [

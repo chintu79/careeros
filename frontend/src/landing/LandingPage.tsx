@@ -6,7 +6,6 @@ import {
   GitPullRequest,
   Scale,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react';
 import { LandingNav } from './LandingNav';
 import { ProductFrame } from './ProductFrame';
@@ -24,19 +23,20 @@ import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
 import { Magnetic } from './fx/Magnetic';
 import { LaserFlow } from './fx/LaserFlow';
-import { withScrollScene, gsap } from './motion';
+import { withScrollScene, gsap, prefersReducedMotion } from './motion';
 import {
   AUTHOR,
   CREDIBILITY,
   FAQ,
-  HERO_WORDS,
   LINKS,
-  STACK,
+  STACK_LAYERS,
 } from './content';
 import './landing.css';
 import './chapters.css';
 
 const CREDIBILITY_ICONS = [Scale, Container, GitPullRequest, ShieldCheck];
+
+const HERO_LINES = ['Your career', 'deserves a', 'command center.'] as const;
 
 // lucide-react no longer ships brand marks; keep the GitHub glyph inline.
 const GitHubMark = ({ size = 16 }: { size?: number }) => (
@@ -66,6 +66,25 @@ const LandingPage = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const animated =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  if (!animated || prefersReducedMotion()) return undefined;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('.l-nav', { yPercent: -100, autoAlpha: 0, duration: 0.45 })
+        .from('.l-hero__laser', { opacity: 0, scaleY: 0.5, transformOrigin: '50% 0%', duration: 0.9 }, 0.1)
+        .from('.l-hero__line-inner', { yPercent: -110, duration: 0.8, stagger: 0.1 }, 0.15)
+        .from('.l-hero__lead', { opacity: 0, y: 16, duration: 0.5 }, 0.5)
+        .from('.l-hero__actions > *', { opacity: 0, y: 14, duration: 0.4, stagger: 0.08 }, 0.62)
+        .from('.l-hero__facts li', { opacity: 0, y: 8, duration: 0.3, stagger: 0.06 }, 0.76)
+        .from('.l-hero__stage', { opacity: 0, y: 30, scale: 0.94, transformOrigin: '50% 0%', duration: 0.9 }, 0.3);
+    }, page.current ?? undefined);
+    return () => ctx.revert();
+  }, []);
+
   useEffect(
     () =>
       withScrollScene(page.current, () => {
@@ -73,15 +92,15 @@ const LandingPage = () => {
         const faq = page.current?.querySelector('#faq');
         const footer = page.current?.querySelector('.l-footer');
 
-        gsap.from('.l-stack__row', {
+        gsap.from('.l-stratum', {
           opacity: 0,
-          y: 14,
+          y: 18,
           duration: 0.45,
-          stagger: 0.06,
+          stagger: 0.08,
           ease: 'power2.out',
-          scrollTrigger: { trigger: stack, start: 'top 74%' },
+          scrollTrigger: { trigger: stack, start: 'top 76%' },
         });
-        gsap.from('.l-faq__head > *', {
+        gsap.from('.l-faq__aside > *', {
           opacity: 0,
           y: 16,
           duration: 0.5,
@@ -97,13 +116,13 @@ const LandingPage = () => {
           ease: 'power2.out',
           scrollTrigger: { trigger: faq, start: 'top 70%' },
         });
-        gsap.from('.l-close__inner > *', {
+        gsap.from('.l-footer__cta-copy > *, .l-footer__cta-actions > *', {
           opacity: 0,
-          y: 22,
-          duration: 0.55,
-          stagger: 0.1,
+          y: 16,
+          duration: 0.5,
+          stagger: 0.09,
           ease: 'power2.out',
-          scrollTrigger: { trigger: '.l-close', start: 'top 76%' },
+          scrollTrigger: { trigger: '.l-footer__cta', start: 'top 88%' },
         });
         gsap.from('.l-footer__grid > *', {
           opacity: 0,
@@ -135,14 +154,11 @@ const LandingPage = () => {
           <div className="l-container l-hero__grid">
             <div className="l-hero__copy">
               <h1 id="hero-title" className="l-hero__title">
-                {HERO_WORDS.map((word, index) => (
-                  <Fragment key={`${word}-${index}`}>
+                {HERO_LINES.map((line, index) => (
+                  <Fragment key={line}>
                     {index > 0 ? ' ' : null}
-                    <span
-                      className="l-hero__word"
-                      style={{ ['--word-index' as string]: index }}
-                    >
-                      {word}
+                    <span className="l-hero__line">
+                      <span className="l-hero__line-inner">{line}</span>
                     </span>
                   </Fragment>
                 ))}
@@ -179,7 +195,7 @@ const LandingPage = () => {
                   className="l-hero__laser"
                   surfaceRef={heroFrame}
                   beamPosition={0.68}
-                  color="#b7a1ff"
+                  color="#65e6c2"
                   intensity={1.25}
                   beamWidth={1.2}
                   flare={1.2}
@@ -236,92 +252,105 @@ const LandingPage = () => {
         <InsightsChapter />
         <OpenSourceChapter />
 
-        <section id="stack" className="l-section" aria-labelledby="stack-title">
+        <section id="stack" className="l-section l-stack" aria-labelledby="stack-title">
           <div className="l-container">
             <Reveal className="l-section__head">
               <h2 id="stack-title" className="l-h2">
                 A stack you can inspect.
               </h2>
               <p className="l-lead">
-                No proprietary runtime and no hidden service. These are the versions and
-                components the repository ships.
+                No proprietary runtime and no hidden service. Five layers, versions the
+                repository actually ships.
               </p>
             </Reveal>
-            <dl className="l-stack">
-              {STACK.map((row) => (
-                <div className="l-stack__row" key={row.label}>
-                  <dt>{row.label}</dt>
-                  <dd>{row.value}</dd>
-                </div>
+            <ol className="l-strata">
+              {STACK_LAYERS.map((layer) => (
+                <li key={layer.index} className="l-stratum">
+                  <span className="l-stratum__index">{layer.index}</span>
+                  <div className="l-stratum__body">
+                    <span className="l-stratum__name">{layer.name}</span>
+                    <ul className="l-stratum__items">
+                      {layer.items.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="l-stratum__note">{layer.note}</p>
+                </li>
               ))}
-            </dl>
+            </ol>
           </div>
         </section>
 
         <section id="faq" className="l-section" aria-labelledby="faq-title">
-          <div className="l-container l-faq">
-            <Reveal className="l-faq__head">
+          <div className="l-container l-faq-grid">
+            <div className="l-faq__aside">
               <h2 id="faq-title" className="l-h2">
                 Questions worth asking.
               </h2>
               <p className="l-lead">
-                Straight answers about licensing, hosting, data and AI. If something is not
-                ready, it is not claimed here.
+                Answers kept honest to what ships: licensing, hosting, data and AI. If
+                something is not ready, it is not claimed here.
               </p>
-            </Reveal>
+              <a className="l-text-link l-faq__email" href={`mailto:${AUTHOR.email}`}>
+                Something missing? Email the author
+                <ArrowUpRight size={14} aria-hidden="true" />
+              </a>
+            </div>
             <div className="l-faq__list">
-              {FAQ.map((item) => (
+              {FAQ.map((item, index) => (
                 <details className="l-faq__item" key={item.question}>
                   <summary className="l-faq__question">
-                    <span>{item.question}</span>
-                    <span className="l-faq__plus" aria-hidden="true" />
+                    <span className="l-faq__num" aria-hidden="true">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span className="l-faq__qtext">{item.question}</span>
                   </summary>
-                  <p className="l-faq__answer">{item.answer}</p>
+                  <div className="l-faq__answer-wrap">
+                    <p className="l-faq__answer">{item.answer}</p>
+                  </div>
                 </details>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="l-close" aria-labelledby="close-title">
-          <div className="l-container l-close__inner">
-            <div className="l-close__copy">
-              <h2 id="close-title" className="l-close__title">
-                Put your career in one place.
-              </h2>
-              <p className="l-close__lead">
-                Open the workspace, or run the whole stack yourself. No account, no trial and
-                no hosted dependency.
-              </p>
-            </div>
-            <div className="l-close__actions">
-              <Magnetic>
-                <a className="l-button l-button--primary" href="/">
-                  <Sparkles size={16} aria-hidden="true" />
-                  Get started
-                </a>
-              </Magnetic>
-              <a
-                className="l-button l-button--secondary"
-                href={LINKS.docs}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Read the docs
-                <ArrowUpRight size={15} aria-hidden="true" />
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
 
       <footer className="l-footer">
+        <div className="l-container l-footer__cta">
+          <div className="l-footer__cta-copy">
+            <h2 className="l-footer__cta-title">Put your career in one place.</h2>
+            <p className="l-footer__cta-lead">
+              Open the workspace, or run the whole stack yourself. No account, no trial and
+              no hosted dependency.
+            </p>
+          </div>
+          <div className="l-footer__cta-actions">
+            <Magnetic>
+              <a className="l-button l-button--primary l-button--large" href="/">
+                Get started
+                <ArrowRight size={16} aria-hidden="true" />
+              </a>
+            </Magnetic>
+            <a
+              className="l-button l-button--secondary"
+              href={LINKS.docs}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the docs
+              <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+
         <div className="l-container l-footer__grid">
           <div className="l-footer__brand">
-            <a href="/welcome" aria-label="CareerOS home">
+            <a className="l-footer__lockup" href="/welcome" aria-label="CareerOS home">
               <Brand />
             </a>
-            <p>
+            <p className="l-footer__tagline">
               Open-source career intelligence. Self-hosted, single-tenant and built to be
               inspected.
             </p>
@@ -353,7 +382,8 @@ const LandingPage = () => {
             <a href="#discover">Discover</a>
             <a href="#track">Track</a>
             <a href="#resume">Resume Studio</a>
-            <a href="#faq">FAQ</a>
+            <a href="#interviews">Interviews</a>
+            <a href="#open-source">Open source</a>
           </nav>
           <nav className="l-footer__col" aria-label="Resources">
             <h2 className="l-footer__heading">Resources</h2>
