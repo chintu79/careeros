@@ -23,7 +23,7 @@ import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
 import { Magnetic } from './fx/Magnetic';
 import { LaserFlow } from './fx/LaserFlow';
-import { withScrollScene, gsap, prefersReducedMotion } from './motion';
+import { withScrollScene, gsap } from './motion';
 import {
   AUTHOR,
   CREDIBILITY,
@@ -64,25 +64,6 @@ const LandingPage = () => {
       meta?.setAttribute('content', previousDescription);
       delete document.documentElement.dataset.page;
     };
-  }, []);
-
-  useEffect(() => {
-    const animated =
-    typeof window !== 'undefined' &&
-    typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
-  if (!animated || prefersReducedMotion()) return undefined;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.from('.l-nav', { yPercent: -100, autoAlpha: 0, duration: 0.45 })
-        .from('.l-hero__laser', { opacity: 0, scaleY: 0.5, transformOrigin: '50% 0%', duration: 0.9 }, 0.1)
-        .from('.l-hero__line-inner', { yPercent: -110, duration: 0.8, stagger: 0.1 }, 0.15)
-        .from('.l-hero__lead', { opacity: 0, y: 16, duration: 0.5 }, 0.5)
-        .from('.l-hero__actions > *', { opacity: 0, y: 14, duration: 0.4, stagger: 0.08 }, 0.62)
-        .from('.l-hero__facts li', { opacity: 0, y: 8, duration: 0.3, stagger: 0.06 }, 0.76)
-        .from('.l-hero__stage', { opacity: 0, y: 30, scale: 0.94, transformOrigin: '50% 0%', duration: 0.9 }, 0.3);
-    }, page.current ?? undefined);
-    return () => ctx.revert();
   }, []);
 
   useEffect(

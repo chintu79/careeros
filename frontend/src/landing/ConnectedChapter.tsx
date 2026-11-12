@@ -76,8 +76,9 @@ export const ConnectedChapter = () => {
           {STEPS.map((step) => (
             <li key={step.index} className="ch02__step">
               <a className="ch02__step-link" href={step.href}>
-                <span className="ch02__dot" aria-hidden="true" />
-                <span className="ch02__step-index">{step.index}</span>
+                <span className="ch02__dot" aria-hidden="true">
+                  {step.index}
+                </span>
                 <span className="ch02__step-name">{step.name}</span>
                 <span className="ch02__step-caption">{step.caption}</span>
               </a>
@@ -92,8 +93,9 @@ export const ConnectedChapter = () => {
         </div>
       </div>
 
-      <p className="l-container ch02__caption">One record, kept current. Linear, Backend Engineering Intern, score 92.</p>
-      <p className="l-container ch02__sample">Product frame: illustrative sample, not real account data.</p>
+      <p className="l-container ch02__sample">
+        One record, kept current. Linear, Backend Engineering Intern, score 92. Illustrative sample.
+      </p>
     </section>
   );
 };
