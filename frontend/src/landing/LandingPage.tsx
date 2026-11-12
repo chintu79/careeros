@@ -127,6 +127,24 @@ const LandingPage = () => {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
+  useEffect(() => {
+    const animated =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    if (!animated) return undefined;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      tl.from('.l-nav', { yPercent: -100, opacity: 0, duration: 0.45 })
+        .from('.l-hero__line-inner', { yPercent: -110, duration: 0.8, stagger: 0.1 }, 0.12)
+        .from('.l-hero__lead', { opacity: 0, y: 16, duration: 0.5 }, 0.5)
+        .from('.l-hero__actions > *', { opacity: 0, y: 14, duration: 0.4, stagger: 0.08 }, 0.62)
+        .from('.l-hero__facts li', { opacity: 0, y: 8, duration: 0.3, stagger: 0.06 }, 0.76)
+        .from('.l-hero__stage', { opacity: 0, y: 30, scale: 0.94, transformOrigin: '50% 0%', duration: 0.9 }, 0.3);
+    }, page.current ?? undefined);
+    return () => ctx.revert();
+  }, []);
+
   useEffect(
     () =>
       withScrollScene(page.current, () => {
