@@ -425,6 +425,10 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   text-align: center;
 }
 
+.ch01__copy .l-h2 {
+  margin-inline: auto;
+}
+
 .ch01__copy .l-lead,
 .ch01__copy .l-chapter__note {
   margin-inline: auto;

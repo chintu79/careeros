@@ -24,7 +24,7 @@ import { Brand } from './Brand';
 import { Magnetic } from './fx/Magnetic';
 import Lenis from 'lenis';
 import { TextHoverEffect } from './fx/TextHoverEffect';
-import { withScrollScene, gsap, ScrollTrigger } from './motion';
+import { withScrollScene, gsap, ScrollTrigger, prefersReducedMotion } from './motion';
 import {
   AUTHOR,
   CREDIBILITY,
@@ -83,6 +83,48 @@ const LandingPage = () => {
       gsap.ticker.remove(raf);
       lenis.destroy();
     };
+  }, []);
+
+  useEffect(() => {
+    const scope = page.current;
+    if (!scope || prefersReducedMotion()) return undefined;
+    const cleanups: Array<() => void> = [];
+    scope.querySelectorAll('.l-faq__item').forEach((item) => {
+      const summary = item.querySelector('summary');
+      const wrap = item.querySelector('.l-faq__answer-wrap');
+      if (!summary || !wrap) return;
+      const onClick = (event: Event) => {
+        event.preventDefault();
+        if (item.hasAttribute('open')) {
+          gsap.to(wrap, {
+            height: 0,
+            opacity: 0,
+            duration: 0.28,
+            ease: 'power2.in',
+            onComplete: () => {
+              item.removeAttribute('open');
+              gsap.set(wrap, { clearProps: 'all' });
+            },
+          });
+        } else {
+          item.setAttribute('open', '');
+          gsap.fromTo(
+            wrap,
+            { height: 0, opacity: 0 },
+            {
+              height: 'auto',
+              opacity: 1,
+              duration: 0.36,
+              ease: 'power2.out',
+              onComplete: () => gsap.set(wrap, { clearProps: 'height,opacity' }),
+            },
+          );
+        }
+      };
+      summary.addEventListener('click', onClick);
+      cleanups.push(() => summary.removeEventListener('click', onClick));
+    });
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   useEffect(

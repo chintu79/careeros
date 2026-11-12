@@ -1250,6 +1250,7 @@ html.js .landing .l-reveal.is-visible {
 }
 
 .landing .l-faq__answer-wrap {
+  overflow: hidden;
   padding: 0 0 22px 62px;
 }
 
