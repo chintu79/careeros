@@ -1,9 +1,12 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
+import './fonts.css'
 import './index.css'
 
+// Both roots are lazy: the authenticated workspace is not downloaded on
+// /welcome, and the landing page is not downloaded everywhere else.
 const LandingPage = lazy(() => import('./landing/LandingPage'))
+const App = lazy(() => import('./App.tsx'))
 
 // The public landing page is opt-in at /welcome; every other path boots the
 // authenticated workspace exactly as before.
@@ -20,7 +23,9 @@ createRoot(document.getElementById('root')!).render(
         <LandingPage />
       </Suspense>
     ) : (
-      <App />
+      <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e12' }} />}>
+        <App />
+      </Suspense>
     )}
   </StrictMode>,
 )

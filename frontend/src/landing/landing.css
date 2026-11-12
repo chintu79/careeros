@@ -304,13 +304,11 @@ html.js .landing .l-reveal.is-visible {
   font-size: 0.875rem;
   font-weight: 600;
   transform: translateY(calc(-100% - 24px));
-  visibility: hidden;
-  transition: transform 160ms var(--l-ease), visibility 160ms var(--l-ease);
+  transition: transform 160ms var(--l-ease);
 }
 
-.landing .l-skip:focus-visible {
+.landing .l-skip:focus {
   transform: translateY(0);
-  visibility: visible;
 }
 
 .landing .l-nav__inner {
