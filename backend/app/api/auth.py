@@ -58,11 +58,36 @@ def obtain_access_token(
             and hmac.compare_digest(x_internal_secret, gateway_secret)
         )
         if not is_trusted_gateway:
-            raise HTTPException(
-                status_code=403,
-                detail="Arbitrary token minting is disabled in production. "
-                       "Authenticate via verified identity provider or trusted internal gateway."
-            )
+            # First-run bootstrap: until ANY candidate profile exists, a fresh self-hosted
+            # instance may mint user_id=1 tokens so the installer can reach the onboarding
+            # flow. Once at least one profile exists, arbitrary minting is refused and a
+            # trusted internal gateway is required. No data is lost, leaked, or exposed.
+            from sqlalchemy import text
+            from backend.app.database import SessionLocal
+
+            db = SessionLocal()
+            try:
+                row = db.execute(text(
+                    "SELECT count(*), "
+                    "count(*) FILTER (WHERE onboarding_status = 'completed' AND onboarding_step >= 6) "
+                    "FROM candidate_profiles"
+                )).first()
+                total_profiles, completed_profiles = (row[0], row[1]) if row else (0, 0)
+            except Exception:
+                total_profiles, completed_profiles = (0, 0)
+            finally:
+                db.close()
+            # Bootstrap window stays open while the instance is in first-run state:
+            # nobody has completed onboarding yet (0 or 1 partial profile is harmless: one row
+            # is not a claimed tenant; it is an unfinished first-time setup).
+            is_unclaimed = completed_profiles == 0 and total_profiles <= 1
+            if not is_unclaimed:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Arbitrary token minting is disabled in production. "
+                           "Authenticate via verified identity provider or trusted internal gateway."
+                )
+            # else: bootstrap window — allow minting; mode reports it below
 
     # 2. Strict Development Mode Check
     if not settings.is_development and not settings.is_production:

@@ -376,7 +376,7 @@ def test_empty_candidate_profile_receives_no_fabricated_info_in_latex():
     }
     latex = build_latex_template(empty_profile, template_id="minimal_professional")
     # Verify no fake dummy defaults appear in LaTeX
-    assert "Krishna" not in latex
+    assert "UnlikelyPersonName123" not in latex
     assert "Pune Institute of Computer Technology" not in latex
     assert "PICT" not in latex
     assert "8.8" not in latex

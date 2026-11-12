@@ -37,8 +37,6 @@ export const SourcesView: React.FC<{ embedded?: boolean }> = ({ embedded = false
 
   // Configure modal state
   const [configSource, setConfigSource] = useState<JobSource | null>(null);
-  const [appId, setAppId] = useState('');
-  const [appKey, setAppKey] = useState('');
   const [feedUrl, setFeedUrl] = useState('');
   const [freqHours, setFreqHours] = useState(6);
 
@@ -132,8 +130,6 @@ export const SourcesView: React.FC<{ embedded?: boolean }> = ({ embedded = false
 
   const openConfig = (src: JobSource) => {
     setConfigSource(src);
-    setAppId(src.config_data?.app_id || '');
-    setAppKey(src.config_data?.app_key || '');
     setFeedUrl(src.config_data?.feed_url || '');
     setFreqHours(src.sync_frequency_hours || 6);
   };
@@ -143,8 +139,6 @@ export const SourcesView: React.FC<{ embedded?: boolean }> = ({ embedded = false
     if (!configSource) return;
     try {
       const config: any = {};
-      if (appId) config.app_id = appId;
-      if (appKey && !appKey.includes('••••')) config.app_key = appKey;
       if (feedUrl) config.feed_url = feedUrl;
 
       await updateSource(configSource.id, {
@@ -410,31 +404,6 @@ export const SourcesView: React.FC<{ embedded?: boolean }> = ({ embedded = false
             <p className="text-[12px] text-slate-500 mb-4">Set credentials and synchronization intervals securely.</p>
 
             <form onSubmit={handleSaveConfig} className="space-y-3.5 text-xs">
-              {configSource.name.toLowerCase().includes('adzuna') && (
-                <>
-                  <div>
-                    <label className="field-label mb-1 block">Adzuna Application ID</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 1a2b3c4d"
-                      value={appId}
-                      onChange={e => setAppId(e.target.value)}
-                      className="input-base font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="field-label mb-1 block">Adzuna Application Key</label>
-                    <input
-                      type="password"
-                      placeholder="API Secret Key"
-                      value={appKey}
-                      onChange={e => setAppKey(e.target.value)}
-                      className="input-base font-mono"
-                    />
-                  </div>
-                </>
-              )}
-
               {configSource.name.toLowerCase().includes('rss') && (
                 <div>
                   <label className="field-label mb-1 block">Custom RSS / Atom Feed URL</label>

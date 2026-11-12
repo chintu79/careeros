@@ -16,12 +16,12 @@ export const SectionBasedEditor: React.FC<SectionBasedEditorProps> = ({
   const [activeTab, setActiveTab] = useState<'profile' | 'education' | 'skills' | 'experience' | 'projects'>('skills');
 
   // Form states
-  const [name, setName] = useState(initialProfile?.name || 'Krishna Patel');
-  const [email, setEmail] = useState(initialProfile?.email || 'krishna@example.com');
+  const [name, setName] = useState(initialProfile?.name || 'Alex Candidate');
+  const [email, setEmail] = useState(initialProfile?.email || 'alex.candidate@example.test');
   const [phone, setPhone] = useState(initialProfile?.phone || '+91 9876543210');
   const [location, setLocation] = useState(initialProfile?.location || 'Pune, India');
-  const [githubUrl, setGithubUrl] = useState(initialProfile?.github_url || 'https://github.com/krishna');
-  const [linkedinUrl, setLinkedinUrl] = useState(initialProfile?.linkedin_url || 'https://linkedin.com/in/krishna');
+  const [githubUrl, setGithubUrl] = useState(initialProfile?.github_url || 'https://github.com/synthetic-candidate');
+  const [linkedinUrl, setLinkedinUrl] = useState(initialProfile?.linkedin_url || 'https://linkedin.com/in/synthetic-candidate');
 
   const [college, setCollege] = useState(initialProfile?.college || 'Pune Institute of Computer Technology');
   const [degree, setDegree] = useState(initialProfile?.degree || 'B.Tech Artificial Intelligence & Data Science');

@@ -1,94 +1,93 @@
-# CareerOS: Intelligent Job Discovery & Opportunity Aggregation Engine (`interniq`)
+# CareerOS — Intelligent Career Command Center
 
-An automated internship and entry-level opportunity discovery engine designed for Indian undergraduate engineering students and early-career developers. 
+Open-source, self-hostable career intelligence for students, job seekers and educators.
+The backend ships a working matching engine, resume builder (LaTeX → PDF), opportunity
+discovery pipeline, application tracker, and candidate profile graph. PostgreSQL with
+pgvector for embeddings. No paid services required to run it.
 
-The system continuously searches multiple company career pages (Greenhouse, Lever, Ashby, SmartRecruiters), public job APIs (Remotive, Remote OK, Adzuna, RSS), and supports compliant manual and URL-based ingestion from India platforms (Internshala, LinkedIn Jobs, Naukri, Wellfound, Indeed). Discovered opportunities are normalized into a unified schema, deduplicated across platforms, analyzed for geographical and cohort eligibility, ranked against verified candidate profiles using local Ollama AI and deterministic 6-factor scoring, and seamlessly handed off to an application tracker.
+## Features
 
----
+- **Overview** — KPI snapshot of your pipeline (applications, interviews, responses, offers) and "Needs you today" recommendations.
+- **Applications board** — Kanban, table, timeline and calendar views over a single record set; AI-assisted follow-up drafts and scheduling.
+- **Resume Studio** — LaTeX-templated master + tailored variants; one-click PDF rebuild against your real profile; ATS-labeled quality audit.
+- **Discover** — Filtered opportunity feed with full-text and vector hybrid match scoring, ranking snapshots, and a saved/applied list.
+- **Interviews** — Question practice with local AI evaluation; on/off methodology (Groq or Ollama — see AI providers below).
+- **Career Insights** — Sankey flow, conversion analysis, source efficacy.
+- **Backup drill** — operator-initiated snapshot of the database and résumé artifacts, with a manifest and SHA-256 checksums. Snapshots are **unencrypted**; checksums verify integrity, not confidentiality. No scheduler or off-box target is bundled.
 
-## Key Features
+## Prerequisites
 
-1. **Multi-Source Aggregation & Company Monitoring**:
-   - **Company ATS Career Pages**: Direct monitoring of Greenhouse, Lever, Ashby, and SmartRecruiters public boards (e.g. Cloudflare, Palantir, Replit, Visa, Databricks, Postman, Razorpay, Zepto, Hasura).
-   - **Job Discovery APIs & Remote Sources**: Remotive, Remote OK, Adzuna, and custom RSS feeds with strict geographical eligibility checks (Remote India vs US/EU resident restrictions).
-   - **India-Focused Platforms**: Compliant URL extraction, description paste, and email alert digest parsing for Internshala, LinkedIn Jobs, Naukri, Wellfound, and Indeed without bypassing anti-bot or authentication barriers.
-2. **5-Stage Ingestion Pipeline**:
-   - **Stage 1 (Collection)**: Raw opportunity ingestion preserving origin data and URLs.
-   - **Stage 2 (Normalization)**: Canonical role mapping, location normalization, and stipend currency parsing.
-   - **Stage 3 (Duplicate Detection)**: Multi-source duplicate identification via URL, external IDs, and company/title similarity. Merges multiple links into a single opportunity record.
-   - **Stage 4 (Validity & Expiration)**: Application deadline tracking (`active`, `possibly_expired`, `expired`, `closed`).
-   - **Stage 5 (Candidate Eligibility)**: Graduation year and geographical authorization verification (flags non-Indian remote positions).
-3. **Local AI Analysis & Transparent Matching**:
-   - **Local Ollama Integration**: Uses `bge-m3` for 1024-dimensional semantic embeddings stored in PostgreSQL `pgvector`, and `qwen2.5:3b` / `llama3.2` for structured technical requirement extraction.
-   - **Deterministic 6-Factor Compatibility Scorer**:
-     - Required Technical Skills: 35%
-     - Relevant Projects & Experience: 25%
-     - Education & Eligibility: 15%
-     - Preferred Skills: 10%
-     - Location & Availability: 10%
-     - Other Requirements: 5%
-   - **Transferable Skills Reasoning**: Explains competency bridges (e.g., Express.js -> REST APIs, TensorFlow -> PyTorch, React -> Vue).
-4. **Opportunity Discovery Dashboard & Application Handoff**:
-   - Tabbed database views: **Recommended**, **Latest**, **Saved**, **Expiring Soon**, **Applied**, and **Dismissed**.
-   - One-click **Track Application** handoff with tailored resume angles and cover letter talking points.
-   - **Source Management Interface** with connection testing, sync intervals, and execution logs.
-   - **Monitored Company Directory** with individual board polling.
-   - **Discovery Analytics** reporting conversion rates, duplicate savings, and sync reliability.
+- **Docker** (Engine 24+)
+- **Docker Compose v2**
+- Enough disk for Postgres + LaTeX toolchain (~2 GB) and node_modules during build.
+- An empty port **8080** (frontend nginx) and **8005** (backend) for host ports, or overrides via `CAREEROS_FRONTEND_PORT` / `CAREEROS_BACKEND_PORT`.
 
----
+## Quickstart
 
-## Architecture
-
-```
-interniq/
-├── backend/
-│   ├── app/
-│   │   ├── ai/            # Ollama client, requirement extractor, 6-factor scorer
-│   │   ├── api/           # FastAPI routers (opportunities, import, companies, sources, etc.)
-│   │   ├── connectors/    # Greenhouse, Lever, Ashby, SmartRecruiters, Remotive, etc.
-│   │   ├── models/        # SQLAlchemy models (pgvector Opportunity, Company, Source, etc.)
-│   │   ├── pipeline/      # Normalizer, Duplicate Detector, Validity & Eligibility checkers
-│   │   ├── services/      # Discovery scheduler, application handoff, analytics, seed data
-│   │   ├── config.py      # Application settings & environment variables
-│   │   ├── database.py    # PostgreSQL connection with pgvector
-│   │   └── main.py        # FastAPI entrypoint
-│   ├── tests/             # Automated test suite (Pytest)
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/    # Discovery, Detail Modal, Companies, Sources, Preferences, Tracker
-│   │   ├── services/      # API client
-│   │   ├── types/         # TypeScript definitions
-│   │   ├── App.tsx        # Root application
-│   │   └── index.css      # Tailwind styling
-│   ├── package.json
-│   └── vite.config.ts
-├── run.sh                 # Unified launcher script
-└── README.md
-```
-
----
-
-## Quick Start
-
-### Prerequisites
-- Python 3.10+ (tested on Python 3.14)
-- Node.js 18+ (tested on Node v22)
-- PostgreSQL with `pgvector` extension enabled
-- Ollama running locally with `bge-m3` and `qwen2.5:3b`
-
-### Launching the Application
-Execute the root runner script:
 ```bash
-./run.sh
+git clone <repository-url> careeros
+cd careeros
+cp .env.example .env
+# Generate and replace the empty required values before starting:
+#   python3 -c "import secrets; print(secrets.token_hex(32))"
+#   POSTGRES_PASSWORD, SECRET_KEY, CAREEROS_TOKEN_SECRET
+# The stack refuses to start while any of them is blank.
+docker compose up -d --build
 ```
-- **Backend**: `http://127.0.0.1:8005` (API docs at `http://127.0.0.1:8005/docs`)
-- **Frontend Dashboard**: `http://127.0.0.1:5174`
 
-### Running Automated Tests
+Then open **http://localhost:8080**. The first user to complete onboarding claims the instance. There is no default credential and no sign-up/account system — single tenant, self-hosted.
+
+## What ships
+
+- `frontend/` — React + Vite + TypeScript SPA served by nginx (single build artifact)
+- `backend/`  — FastAPI + SQLAlchemy + Google Calendar/email/AI adapters (all optional)
+- `backend/storage/resumes/` — your PDFs and TeX (never committed; lives in the `resume_storage` volume)
+- `deploy/`     — Dockerfiles + `nginx.conf` + optional TLS reference (`nginx.tls.conf`)
+- `.github/workflows/ci.yml` — 5-job CI (backend suite on a synthetic disposable DB, frontend, security, Docker boot validation, release gate). The project does not ship CI secrets — all defaults are synthetic.
+
+## Configuration
+
+All config is via `.env` plus the Docker Compose network. See `.env.example` for the full list of supported variables. Never commit `.env`. The self-host path uses a **bundled** Postgres (`pgvector/pgvector:pg17, port internal only`).
+
+Frontend nginx reverse-proxies `/api/*` to the backend automatically; no CORS or sub-path mounting is required.
+
+## AI providers
+
+*Everything in CareerOS runs without any AI key.* AI is an enhancement, not a dependency:
+
+- **Groq** (`GROQ_API_KEY`) — the matching-engine explanations, interview-question authoring and some Resume Studio features.
+- **Ollama** (`OLLAMA_BASE_URL`, default tries `http://host.docker.internal:11434`) — local inference for text classification and everyday chat.
+
+Leave both unset for a fully local instance; features fall back gracefully with explicit "AI unavailable" messaging (not errors).
+
+---
+
+### Backup warning
+
+This application holds **your** personal data (resumes, job applications, interview notes, career profiles — all PII). Backups, snapshots and restores are **your** operational responsibility. The repo ships operator-controlled scripts, never an automatic scheduler. Before upgrading the running container, snapshot Postgres with:
+
 ```bash
-PYTHONPATH=. backend/venv/bin/pytest backend/tests/test_engine.py
+docker compose exec -T db pg_dump -U careeros -d careeros > careeros_$(date +%F).sql
 ```
 
-### Continuous integration
-`.github/workflows/ci.yml` runs pull-request and `main` validation: backend suite on a disposable synthetic CI database, frontend install/type-check/tests/build, static security checks, and Docker build + boot. `release-gate` passes only when every required check succeeds. Production deploy is **not** part of this pipeline and remains operator-controlled. See `.taste-skill/production-readiness/ci-release-gates.md`.
+Restore drills are documented in `docs/self-hosting.md` and exercised in `tests/test_backup_restore.py`.
+
+---
+
+## Troubleshooting
+
+- `Embedding must come from pgvector >= 0.8` → confirm `CREATE EXTENSION vector;` succeeded in the bundled db before migrations ran (the bundled bootstrap creates it automatically).
+- Port 8080 already bound → `CAREEROS_FRONTEND_PORT=8082 docker compose up -d` or kill whatever holds 8080.
+- First run appears "empty" → that's expected; complete the onboarding wizard.
+- Frontend shows "CareerOS backend is temporarily unreachable" → `docker compose logs backend` and confirm `/api/ready` is `200`.
+- PostgreSQL migration `ERROR: type "vector" does not exist` → you ran a manual `psql CREATE TABLE` against the db before bootstrap; use the bundled compose flow instead.
+
+## License
+
+Licensed under the [Apache License, Version 2.0](LICENSE). Third-party
+dependencies retain their own licenses; the audit and dependency-license
+review are recorded in `docs/opensource-audit.md`.
+
+## Not yet production-ready for your data
+
+Bring this offline community helm with care: review `SECURITY.md`, do not expose a self-hosted instance publicly without deliberate hardening, and rehearse a backup + restore before entrusting your personal data to it.

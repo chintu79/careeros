@@ -310,11 +310,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
         >
           <span className="flex items-center gap-2.5 whitespace-nowrap">
             <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-paper-3)] border border-[var(--color-rule-2)] font-mono text-[10px] font-semibold text-[var(--color-accent)]">
-              K
+              A
             </span>
             {!isCollapsed && (
               <span className="flex flex-col truncate">
-                <span className="whitespace-nowrap text-[12px] font-medium leading-tight text-[var(--color-ink)]">Krishna</span>
+                <span className="whitespace-nowrap text-[12px] font-medium leading-tight text-[var(--color-ink)]">Candidate</span>
                 <span className="whitespace-nowrap text-[10px] leading-tight text-[var(--color-muted)]">Active</span>
               </span>
             )}

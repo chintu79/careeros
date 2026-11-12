@@ -30,7 +30,6 @@ DEFAULT_SOURCES = [
     {"name": "Remotive", "source_type": "api", "integration_method": "api", "connection_status": "operational", "sync_frequency_hours": 12},
     {"name": "Remote OK", "source_type": "api", "integration_method": "feed", "connection_status": "operational", "sync_frequency_hours": 12},
     {"name": "LinkedIn Jobs", "source_type": "portal", "integration_method": "direct_url", "connection_status": "operational", "sync_frequency_hours": 24},
-    {"name": "Adzuna", "source_type": "api", "integration_method": "api", "connection_status": "not_configured", "sync_frequency_hours": 12},
     {"name": "RSS Feeds", "source_type": "rss", "integration_method": "feed", "connection_status": "operational", "sync_frequency_hours": 6},
     {"name": "AICTE Internship Portal", "source_type": "portal", "integration_method": "direct_url", "connection_status": "unsupported", "sync_frequency_hours": 6},
     {"name": "Naukri", "source_type": "portal", "integration_method": "text_paste", "connection_status": "unsupported", "sync_frequency_hours": 6},
@@ -56,10 +55,16 @@ def ensure_default_sources_seeded(db: Session):
             # Sync status if currently incompatible
             if def_s["name"] in ["Naukri", "Wellfound", "Indeed India", "AICTE Internship Portal"]:
                 existing.connection_status = "unsupported"
-            elif def_s["name"] == "Adzuna" and not (existing.config_data or {}).get("app_key"):
-                existing.connection_status = "not_configured"
             elif existing.connection_status == "connected":
                 existing.connection_status = "operational"
+    # Adzuna was retired in v3.1.0; mark any row created by an earlier version.
+    db.query(JobSource).filter(JobSource.name.ilike("Adzuna")).update(
+        {
+            "connection_status": "unsupported",
+            "last_error_message": "Adzuna integration retired in v3.1.0",
+        },
+        synchronize_session=False,
+    )
     db.commit()
 
 class SourceConfigUpdate(BaseModel):

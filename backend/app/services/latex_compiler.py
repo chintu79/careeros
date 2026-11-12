@@ -203,10 +203,7 @@ class PDFPromotionTransaction:
         if not self.committed:
             self.rollback()
 
-TECTONIC_BIN = "/home/krishna/.local/bin/tectonic"
-if not os.path.exists(TECTONIC_BIN):
-    import shutil
-    TECTONIC_BIN = shutil.which("tectonic") or "tectonic"
+TECTONIC_BIN = shutil.which("tectonic") or "tectonic"
 
 def escape_latex(text: Optional[str]) -> str:
     """Escapes special LaTeX characters for secure, error-free compilation."""

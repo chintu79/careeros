@@ -44,7 +44,6 @@ PLATFORM_RELIABILITY_MAP = {
     "linkedin": {"score": 92, "tier": "High", "badge": "LinkedIn Verified"},
     "remotive": {"score": 90, "tier": "High", "badge": "Curated Remote Feed"},
     "remoteok": {"score": 88, "tier": "Medium", "badge": "Curated Feed"},
-    "adzuna": {"score": 85, "tier": "Medium", "badge": "Aggregated Feed"},
     "rss": {"score": 85, "tier": "Medium", "badge": "Verified RSS Feed"}
 }
 

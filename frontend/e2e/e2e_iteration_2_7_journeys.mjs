@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import path from 'path';
 
-const ARTIFACT_DIR = '/home/krishna/.gemini/antigravity/brain/913ec7f7-c5ad-46ab-9267-acc5887bf6b9';
+const ARTIFACT_DIR = process.env.CAREEROS_E2E_ARTIFACTS || path.join(process.cwd(), 'artifacts');
 const BASE_URL = 'http://127.0.0.1:5174';
 const BACKEND_URL = 'http://127.0.0.1:8005';
 
@@ -39,7 +39,7 @@ async function runE2E() {
     console.log('\n--- Journey 1 & 2: Sign in with Bearer token & Open Discovery ---');
     await page.goto(BASE_URL, { waitUntil: 'networkidle' });
 
-    // Ensure authenticated as User 1 (Shreekrishna Chinta)
+    // Ensure authenticated as User 1 (Candidate One)
     await page.evaluate(async (backendUrl) => {
       const res = await fetch(`${backendUrl}/api/auth/token`, {
         method: 'POST',

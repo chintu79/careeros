@@ -59,7 +59,7 @@ def clean_test_fixtures(db: Session):
 
 def test_authenticated_token_issuance_and_security(client: TestClient):
     """Verify developmental token minting and input validation for candidates."""
-    # 1. Valid user 1 (Shreekrishna Chinta)
+    # 1. Valid user 1 (Candidate One)
     res1 = client.post("/api/auth/token", json={"user_id": 1})
     assert res1.status_code == 200, res1.text
     data1 = res1.json()
@@ -161,7 +161,7 @@ def test_http_410_pagination_session_expired_envelope(client: TestClient):
 def test_candidate_tenant_isolation_in_discovery_and_matching(client: TestClient, db: Session):
     """
     Verify strict candidate tenant isolation:
-    User 1 (Shreekrishna Chinta) and User 88888 (isolated demo candidate)
+    User 1 (Candidate One) and User 88888 (isolated demo candidate)
     receive independent evaluation results for the same opportunity.
     """
     # 1. Setup Candidate 88888 with different skills

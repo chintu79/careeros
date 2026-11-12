@@ -1,0 +1,91 @@
+# CareerOS — self-host one-command install.
+#
+#   cp .env.example .env
+#   # generate each with: python3 -c "import secrets; print(secrets.token_hex(32))"
+#   # then replace POSTGRES_PASSWORD=, SECRET_KEY=, CAREEROS_TOKEN_SECRET=
+#   docker compose up -d --build
+#
+# Frontend: http://localhost:8080   Backend (internal): backend:8005 exposed on host at http://localhost:8005
+# Postgres is internal only (not published). Resume artifacts persist in the resume_storage volume.
+#
+# This is NOT the production deployment path — it's the self-hosted developer/ops path.
+# For a pgvector-enabled database, this compose runs pgvector/pgvector:pg17.
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: careeros
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required — generate one with python3 -c "import secrets; print(secrets.token_hex(32))"}
+      POSTGRES_DB: careeros
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U careeros -d careeros"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    networks: [careeros]
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.backend
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      AUTH_REQUIRED: ${AUTH_REQUIRED:-true}
+      DATABASE_URL: postgresql://careeros:${POSTGRES_PASSWORD}@db:5432/careeros
+      CAREEROS_RUN_MIGRATIONS: ${CAREEROS_RUN_MIGRATIONS:-1}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required — generate one with python3 -c "import secrets; print(secrets.token_hex(32))"}
+      CAREEROS_TOKEN_SECRET: ${CAREEROS_TOKEN_SECRET:?CAREEROS_TOKEN_SECRET is required — generate one with python3 -c "import secrets; print(secrets.token_hex(32))"}
+      CAREEROS_TOKEN_TTL: ${CAREEROS_TOKEN_TTL:-86400}
+      TOKEN_VERSION: ${TOKEN_VERSION:-1}
+      CAREEROS_ALLOWED_ORIGINS: ${CAREEROS_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-llama3.2:latest}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-bge-m3}
+      CAREEROS_STORAGE_DIR: /app/backend/storage/resumes
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      INTERNAL_GATEWAY_SECRET: ${INTERNAL_GATEWAY_SECRET:-}
+      MATCHING_ENGINE_GENERATION: ${MATCHING_ENGINE_GENERATION:-2}
+    volumes:
+      - resume_storage:/app/backend/storage/resumes
+    ports:
+      - "${CAREEROS_BACKEND_PORT:-8005}:8005"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8005/api/health', timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 5
+    networks: [careeros]
+    restart: unless-stopped
+    command: ["sh", "-c", "python -m backend.ops.bootstrap && exec python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8005 --proxy-headers"]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.frontend
+    ports:
+      - "${CAREEROS_FRONTEND_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [careeros]
+    restart: unless-stopped
+
+networks:
+  careeros:
+    driver: bridge
+
+volumes:
+  pgdata:
+  resume_storage:

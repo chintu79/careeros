@@ -55,7 +55,7 @@ def test_intelligence_lru_cache_operations():
 def test_context_retriever_candidate_scopes(db_session):
     """Verify scoped retrieval of Master Candidate Profile without hallucination."""
     full = get_candidate_context(db_session, scope="full")
-    assert "Krishna" in full["name"] or "chinta" in full["name"].lower()
+    assert "Alex" in full["name"]
     assert len(full.get("verified_skills", [])) >= 10
     assert len(full.get("verified_projects", [])) >= 5
     assert "preferences" in full
@@ -161,7 +161,7 @@ def test_execute_chat_tools_grounding(db_session):
 
     # Candidate profile
     res_cand = execute_chat_tool("get_candidate_profile", {}, db_session)
-    assert "Krishna" in res_cand["name"] or "chinta" in res_cand["name"].lower()
+    assert "Alex" in res_cand["name"]
 
     # Application pipeline
     res_pipe = execute_chat_tool("get_application_pipeline", {}, db_session)

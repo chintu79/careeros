@@ -49,12 +49,12 @@ def test_candidate_1_baseline_immutability_and_master_resume_integrity():
         db.query(CandidateProfile).filter(CandidateProfile.user_id == USER_ID).delete(synchronize_session=False)
         fixture = CandidateProfile(
             user_id=USER_ID,
-            name="Shreekrishna Chinta",
+            name="Candidate One",
             email="candidate1@example.test",
             onboarding_status="completed",
             onboarding_step=6,
             degree="B.Tech in Artificial Intelligence & Data Science",
-            college="AISSMS-IOIT",
+            college="Regional University",
             graduation_year=2028,
             evidence_version=34,
             skills=[
@@ -81,7 +81,7 @@ def test_candidate_1_baseline_immutability_and_master_resume_integrity():
 
         c1 = fixture
         assert c1 is not None, "Candidate 1 fixture must exist"
-        assert c1.name == "Shreekrishna Chinta", f"Candidate 1 name altered: {c1.name}"
+        assert c1.name == "Candidate One", f"Candidate 1 name altered: {c1.name}"
         assert c1.onboarding_status == "completed", f"Candidate 1 status altered: {c1.onboarding_status}"
         assert len(c1.projects) == 7, f"Candidate 1 projects count altered: {len(c1.projects)}"
         

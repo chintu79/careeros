@@ -2,16 +2,16 @@
 Safety guard + provisioning for the disposable PostgreSQL test database.
 
 The CareerOS backend test suite is PostgreSQL-native (pg_trgm/GIN indexes,
-advisory locks, psycopg concurrency semantics). Empty-schema test databases
-leave ~30 tests failing only because they exercise behavior anchored on a
-consistent snapshot (master resume id=1, the tracked pipeline feeding
-command-center assertions, replication of evidence relationships). Re-seeding
-every one of those fixtures risks subtly altering semantics, so the suite uses
-a disposable, uniquely-named, same-server full CLONE of the live database.
+advisory locks, psycopg concurrency semantics) and needs deterministic seed
+data (master resume id=1, the tracked pipeline feeding command-center
+assertions, evidence relationships).
 
-The alternative (schema-only clone) is retained as make_disposable_schema_only
-but is not the suite default; full clones are justified because they preserve
-the exact data topology those tests are written against without code changes.
+The suite default (CI and local) is a brand-new, uniquely-named, same-server
+database created empty, migrated, and seeded from `synthetic_fixture`. The
+configured database is never dumped or cloned, so no operator or production
+rows enter the test environment. `make_disposable_pg_database` (full clone)
+and `make_disposable_schema_only` remain for explicit lifecycle/backup tests
+and opt-in diagnostics; nothing calls the full clone by default.
 
 Risks accepted, mitigations enforced:
 
@@ -106,7 +106,7 @@ def _fork_database_url(prod, test_db: str) -> str:
 
 
 def make_disposable_pg_database(production_url: str) -> str:
-    """Full clone fork (default for this suite — see module docstring)."""
+    """Full clone fork (explicit use only; the suite default is synthetic)."""
     prod = parse_pg_url(production_url)
     test_db = TEST_DB_PREFIX + uuid.uuid4().hex[:12]
     host, port, user, password = prod.hostname, prod.port or 5432, prod.username, prod.password

@@ -141,7 +141,7 @@ def get_interview_prep_pack(
         
     cand = db.query(CandidateProfile).first()
     if not cand:
-        cand = CandidateProfile(name="Krishna Patel", degree="B.Tech Computer Science")
+        cand = CandidateProfile(name="Alex Candidate", degree="B.Tech Computer Science")
 
     prep_pack = generate_interview_prep(opportunity=opp, profile=cand, db=db)
     return prep_pack

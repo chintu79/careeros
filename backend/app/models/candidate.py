@@ -42,7 +42,7 @@ class CandidateProfile(Base):
     # Skills structure: [{"name": "Python", "level": "advanced", "category": "language", "evidence": "Argus AI, FastAPI microservices"}]
     skills = Column(JSON, default=list)
     
-    # Projects: [{"title": "CareerOS Job Discovery Engine", "description": "Automated opportunity aggregator with pgvector and Ollama", "tech_stack": ["FastAPI", "PostgreSQL", "React", "Ollama"], "url": "https://github.com/krishna/careeros"}]
+    # Projects: [{"title": "CareerOS Job Discovery Engine", "description": "Automated opportunity aggregator with pgvector and Ollama", "tech_stack": ["FastAPI", "PostgreSQL", "React", "Ollama"], "url": "https://github.com/synthetic-candidate/careeros"}]
     projects = Column(JSON, default=list)
     
     # Experience: [{"title": "Software Engineering Intern", "company": "Tech Labs", "duration": "3 months", "description": "Built backend APIs and vector search microservices."}]

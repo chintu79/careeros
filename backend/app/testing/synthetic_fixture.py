@@ -97,7 +97,7 @@ def _seed_synthetic_rows(engine) -> None:
     with Session(engine) as db:
         candidate = CandidateProfile(
             user_id=1,
-            name="Krishna Synthetic Test",
+            name="Alex Synthetic Test",
             email="synthetic.candidate1@example.test",
             phone="+90 555 000 0001",
             location="Istanbul, Türkiye",
@@ -267,7 +267,7 @@ def _seed_synthetic_rows(engine) -> None:
                 "\\usepackage{hyperref}\n"
                 "\\hypersetup{colorlinks=true}\n"
                 "\\begin{document}\n"
-                "Krishna Synthetic Test | synthetic.candidate1@example.test | +90 555 000 0001 | github.com/synthetic-candidate\n\n"
+                "Alex Synthetic Test | synthetic.candidate1@example.test | +90 555 000 0001 | github.com/synthetic-candidate\n\n"
                 "\\section*{Education}\n"
                 "\\begin{itemize}\n"
                 "\\item B.Tech Artificial Intelligence \\& Data Science, 2023-2027\n"
@@ -287,7 +287,7 @@ def _seed_synthetic_rows(engine) -> None:
             version=78,
             pdf_path="/synthetic/artifacts/master_resume.pdf",
             structured_content={
-                "personal_info": {"name": "Krishna Synthetic Test", "email": "synthetic.candidate1@example.test"},
+                "personal_info": {"name": "Alex Synthetic Test", "email": "synthetic.candidate1@example.test"},
                 "summary": "Synthetic AI engineer with strong Python, FastAPI and PostgreSQL. Seeking an internship to build reliable backend services at scale.",
                 "education": [
                     {"degree": "B.Tech in Artificial Intelligence \\& Data Science", "college": "Synthetic Institute of Technology", "graduation_year": 2027},

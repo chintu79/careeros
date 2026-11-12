@@ -48,16 +48,16 @@ INITIAL_PREFERENCES = {
 }
 
 INITIAL_CANDIDATE = {
-    "name": "Shreekrishna Chinta",
+    "name": "Candidate One",
     "email": "synthetic.candidate@example.test",
     "phone": "+90 555 000 0001",
     "location": "Pune, Maharashtra, India",
-    "bio": "AI & Data Science student at AISSMS-IOIT Pune, building full-stack applications, intelligent automation systems, and developer tools.",
+    "bio": "AI & Data Science student at Regional University Pune, building full-stack applications, intelligent automation systems, and developer tools.",
     "degree": "B.Tech in Artificial Intelligence & Data Science",
     "graduation_year": 2028,
-    "college": "AISSMS Institute of Information Technology (AISSMS-IOIT), Pune",
+    "college": "Regional University",
     "github_url": "https://github.com/synthetic-candidate",
-    "linkedin_url": "https://www.linkedin.com/in/shreekrishna-chinta/",
+    "linkedin_url": "https://www.linkedin.com/in/synthetic-candidate/",
     "skills": [
         {"name": "Python", "level": "advanced", "category": "Languages"},
         {"name": "JavaScript", "level": "advanced", "category": "Languages"},
@@ -104,7 +104,7 @@ INITIAL_CANDIDATE = {
     "experience": [
         {
             "title": "Web Team Member",
-            "company": "ACM Student Chapter, AISSMS-IOIT",
+            "company": "ACM Student Chapter, Regional University",
             "duration": "Ongoing",
             "description": "Resolved frontend issues, built responsive UI components, and shipped bug fixes using HTML, CSS, JavaScript, React, and Next.js. Collaborated through Git and GitHub for issue tracking, pull requests, and code reviews."
         },
@@ -138,7 +138,6 @@ INITIAL_SOURCES = [
     {"name": "SmartRecruiters", "source_type": "ats", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 6},
     {"name": "Remotive", "source_type": "api", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 12},
     {"name": "Remote OK", "source_type": "api", "integration_method": "api", "connection_status": "connected", "sync_frequency_hours": 12},
-    {"name": "Adzuna", "source_type": "api", "integration_method": "api", "connection_status": "needs_configuration", "sync_frequency_hours": 12},
     {"name": "RSS Feeds", "source_type": "rss", "integration_method": "feed", "connection_status": "connected", "sync_frequency_hours": 6},
     {"name": "Manual Import", "source_type": "manual", "integration_method": "direct_url", "connection_status": "manual_import_only", "sync_frequency_hours": 24},
     {"name": "Internshala", "source_type": "portal", "integration_method": "direct_url", "connection_status": "manual_import_only", "sync_frequency_hours": 24},
@@ -157,7 +156,7 @@ async def seed_initial_data(db: Session):
     """Seed default candidate profile, preferences, companies, sources, and rich opportunities."""
     # 1. Candidate Profile
     if not db.query(CandidateProfile).first():
-        logger.info("Seeding candidate profile for Krishna...")
+        logger.info("Seeding candidate profile...")
         cand = CandidateProfile(**INITIAL_CANDIDATE)
         db.add(cand)
         db.commit()

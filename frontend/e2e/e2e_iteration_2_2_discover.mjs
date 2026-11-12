@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import path from 'path';
 
-const ARTIFACTS_DIR = '/home/krishna/.gemini/antigravity/brain/913ec7f7-c5ad-46ab-9267-acc5887bf6b9';
+const ARTIFACTS_DIR = process.env.CAREEROS_E2E_ARTIFACTS || path.join(process.cwd(), 'artifacts');
 const BASE_URL = 'http://127.0.0.1:5174';
 
 async function runDiscoverAudit() {
@@ -155,13 +155,13 @@ async function runDiscoverAudit() {
     await page.waitForTimeout(1000);
     console.log('Switched to Candidate B on Discover.');
 
-    // Switch back to Candidate 1 (Shreekrishna)
+    // Switch back to Candidate 1 (CandidateOne)
     await candidateSwitcherBtn.click();
     await page.waitForTimeout(400);
-    const candidateAItem = page.locator('button[role="menuitem"]:has-text("Shreekrishna")');
+    const candidateAItem = page.locator('button[role="menuitem"]:has-text("CandidateOne")');
     await candidateAItem.click();
     await page.waitForTimeout(1000);
-    console.log('Switched back to Candidate 1 (Shreekrishna).');
+    console.log('Switched back to Candidate 1 (CandidateOne).');
   }
 
   await context.close();

@@ -156,7 +156,7 @@ def test_api_endpoints():
     # 7. Candidate Profile
     res_cand = client.get("/api/candidate")
     assert res_cand.status_code == 200
-    assert "Krishna" in res_cand.json()["name"] or "chinta" in res_cand.json()["name"].lower()
+    assert "Alex" in res_cand.json()["name"]
     
     # 8. Analytics
     res_analytics = client.get("/api/analytics")
@@ -326,15 +326,8 @@ def test_source_adapter_functionality():
     assert rem.source_type == "api"
 
 def test_source_failures_and_recovery():
-    """Item 2: Test that source failures (unconfigured credentials, bot blocks) are handled gracefully without crashing."""
-    from backend.app.connectors.adzuna import AdzunaConnector
+    """Item 2: Test that source failures (bot blocks) are handled gracefully without crashing."""
     from backend.app.connectors.india_platforms import INDIA_PLATFORMS
-    import asyncio
-
-    # Adzuna with missing credentials returns empty without crashing
-    adz = AdzunaConnector(app_id="", app_key="")
-    res = asyncio.run(adz.fetch_jobs())
-    assert res == []
 
     # India platforms document their status clearly
     for portal in ["naukri", "wellfound", "indeed", "aicte"]:
