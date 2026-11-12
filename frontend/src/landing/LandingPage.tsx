@@ -333,6 +333,14 @@ const LandingPage = () => {
               <span className="l-footer__place">{AUTHOR.location}</span>
             </p>
             <div className="l-footer__contact">
+              <a href={AUTHOR.portfolio} target="_blank" rel="noreferrer">
+                Portfolio
+              </a>
+              <span aria-hidden="true">/</span>
+              <a href={AUTHOR.linkedin} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
+              <span aria-hidden="true">/</span>
               <a href={`mailto:${AUTHOR.email}`}>Email</a>
               <span aria-hidden="true">/</span>
               <a href={AUTHOR.github} target="_blank" rel="noreferrer">

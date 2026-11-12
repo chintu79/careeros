@@ -34,6 +34,8 @@ export const AUTHOR = {
   github: 'https://github.com/chintu79',
   email: 'shrikrishnachinta79@gmail.com',
   location: 'Pune, India',
+  portfolio: 'https://shreekrishnachinta.vercel.app',
+  linkedin: 'https://linkedin.com/in/shreekrishna-chinta',
 };
 
 export const CREDIBILITY = [

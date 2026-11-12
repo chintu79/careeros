@@ -135,5 +135,13 @@ describe('LandingPage', () => {
       'href',
       'mailto:shrikrishnachinta79@gmail.com',
     );
+    expect(scope.getByRole('link', { name: 'Portfolio' })).toHaveAttribute(
+      'href',
+      'https://shreekrishnachinta.vercel.app',
+    );
+    expect(scope.getByRole('link', { name: 'LinkedIn' })).toHaveAttribute(
+      'href',
+      'https://linkedin.com/in/shreekrishna-chinta',
+    );
   });
 });
