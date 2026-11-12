@@ -22,7 +22,9 @@ import { InsightsChapter } from './InsightsChapter';
 import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
 import { Magnetic } from './fx/Magnetic';
-import { withScrollScene, gsap } from './motion';
+import Lenis from 'lenis';
+import { TextHoverEffect } from './fx/TextHoverEffect';
+import { withScrollScene, gsap, ScrollTrigger } from './motion';
 import {
   AUTHOR,
   CREDIBILITY,
@@ -61,6 +63,25 @@ const LandingPage = () => {
       document.title = previousTitle;
       meta?.setAttribute('content', previousDescription);
       delete document.documentElement.dataset.page;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.matchMedia !== 'function' ||
+      !window.matchMedia('(prefers-reduced-motion: no-preference)').matches
+    ) {
+      return undefined;
+    }
+    const lenis = new Lenis({ duration: 1.15, smoothWheel: true, anchors: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    const raf = (time: number) => lenis.raf(time * 1000);
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(raf);
+      lenis.destroy();
     };
   }, []);
 
@@ -374,8 +395,8 @@ const LandingPage = () => {
             </a>
           </nav>
         </div>
-        <div className="l-footer__wordmark" aria-hidden="true">
-          CareerOS
+        <div className="l-footer__wordmark">
+          <TextHoverEffect text="CareerOS" />
         </div>
         <div className="l-container l-footer__bottom">
           <span>Apache-2.0</span>

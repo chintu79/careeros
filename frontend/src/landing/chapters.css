@@ -127,6 +127,32 @@ html.js .l-chapters__dot.is-active .l-chapters__label {
   color: var(--l-ink-2);
 }
 
+.l-chapters__num {
+  transition:
+    border-color 160ms var(--l-ease),
+    color 160ms var(--l-ease),
+    transform 200ms var(--l-ease),
+    box-shadow 200ms var(--l-ease);
+}
+
+.l-chapters__dot:hover .l-chapters__num,
+.l-chapters__dot:focus-visible .l-chapters__num {
+  border-color: var(--l-accent-line-strong);
+  color: var(--l-accent);
+  transform: scale(1.25);
+  box-shadow: 0 0 12px var(--l-accent-glow);
+}
+
+.l-chapters__dot:focus-visible {
+  outline: 2px solid var(--l-accent);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.l-chapters__dot:hover .l-chapters__label {
+  color: var(--l-ink);
+}
+
 /* Shared demo chrome */
 .demo,
 .board,

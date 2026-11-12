@@ -1434,18 +1434,35 @@ html.js .landing .l-reveal.is-visible {
 
 .landing .l-footer__wordmark {
   overflow: hidden;
-  margin: clamp(24px, 4vw, 56px) 0 -0.14em;
-  padding: 0 var(--l-gutter);
-  color: transparent;
-  font-family: var(--l-font-display);
-  font-size: clamp(5rem, 17vw, 15rem);
-  font-weight: 400;
-  letter-spacing: -0.05em;
-  line-height: 0.74;
-  text-align: center;
-  -webkit-text-stroke: 1px var(--l-rule-soft);
+  margin: clamp(20px, 3vw, 48px) 0 -0.18em;
+  padding-inline: var(--l-gutter);
   user-select: none;
-  pointer-events: none;
+}
+
+.landing .l-wordmark__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.landing .l-wordmark__outline,
+.landing .l-wordmark__fill {
+  font-family: var(--l-font-display);
+  font-size: 168px;
+  letter-spacing: -0.03em;
+}
+
+.landing .l-wordmark__outline {
+  fill: transparent;
+  stroke: var(--l-rule-soft);
+  stroke-width: 1.1px;
+}
+
+.landing .l-wordmark__fill {
+  fill: transparent;
+  stroke: url(#l-wordmark-gradient);
+  stroke-width: 1.4px;
+  transition: opacity 220ms var(--l-ease);
 }
 
 /* Rotating star border around the install terminal. */
