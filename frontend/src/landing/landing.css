@@ -543,18 +543,6 @@ html.js .landing .l-reveal.is-visible {
   padding-block: clamp(6px, 1.2vw, 16px);
 }
 
-/* The beam layer sits behind the frame; the canvas is sized by the stage. */
-.landing .l-hero__laser {
-  position: absolute;
-  inset: -18% -12% 6%;
-  width: auto;
-  height: auto;
-  z-index: 0;
-  opacity: 0.7;
-  filter: blur(5px);
-  mask-image: radial-gradient(ellipse 88% 82% at 50% 42%, black 38%, transparent 84%);
-}
-
 .landing .l-hero__frame {
   position: relative;
   z-index: 1;
@@ -1512,10 +1500,6 @@ html.js .landing .l-reveal.is-visible {
     max-width: none;
   }
 
-  .landing .l-hero__laser {
-    display: none;
-  }
-
   .landing .l-hero__visual {
     max-width: 720px;
   }
@@ -1594,9 +1578,6 @@ html.js .landing .l-reveal.is-visible {
     padding-top: 36px;
   }
 
-  .landing .l-hero__laser {
-    display: none;
-  }
 
   .landing .terminal__body {
     white-space: pre-wrap;

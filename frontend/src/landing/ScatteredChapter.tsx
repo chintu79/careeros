@@ -3,6 +3,7 @@ import {
   Calendar,
   FileSpreadsheet,
   FileText,
+  Inbox,
   Link2,
   ListChecks,
   StickyNote,
@@ -11,12 +12,13 @@ import { withScrollScene, gsap } from './motion';
 
 const FRAGMENTS = [
   { icon: Link2, label: 'Greenhouse', sub: 'Backend Eng · 92', className: 'ch-f1' },
+  { icon: Link2, label: 'Lever', sub: 'Platform · 87', className: 'ch-f2' },
   { icon: FileText, label: 'resume_final_v9.tex', sub: 'third copy in Documents/', className: 'ch-f3' },
   { icon: FileSpreadsheet, label: 'applications.xlsx', sub: '43 rows, three views', className: 'ch-f4' },
   { icon: StickyNote, label: 'notes.md', sub: 'system design, then behavioural', className: 'ch-f5' },
   { icon: Calendar, label: 'Calendar', sub: 'Thu 14:00 · system design', className: 'ch-f6' },
   { icon: ListChecks, label: 'Reminders', sub: '3 follow-ups, all overdue', className: 'ch-f7' },
-  { icon: Link2, label: 'Lever', sub: 'Platform · 87', className: 'ch-f2' },
+  { icon: Inbox, label: 'Inbox', sub: '3 recruiter threads unread', className: 'ch-f8' },
 ] as const;
 
 export const ScatteredChapter = () => {

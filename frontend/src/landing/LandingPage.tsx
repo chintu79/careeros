@@ -22,7 +22,6 @@ import { InsightsChapter } from './InsightsChapter';
 import { OpenSourceChapter } from './OpenSourceChapter';
 import { Brand } from './Brand';
 import { Magnetic } from './fx/Magnetic';
-import { LaserFlow } from './fx/LaserFlow';
 import { withScrollScene, gsap } from './motion';
 import {
   AUTHOR,
@@ -47,7 +46,6 @@ const GitHubMark = ({ size = 16 }: { size?: number }) => (
 
 const LandingPage = () => {
   const page = useRef<HTMLDivElement | null>(null);
-  const heroFrame = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -172,25 +170,7 @@ const LandingPage = () => {
 
             <div className="l-hero__visual">
               <div className="l-hero__stage">
-                <LaserFlow
-                  className="l-hero__laser"
-                  surfaceRef={heroFrame}
-                  beamPosition={0.68}
-                  color="#65e6c2"
-                  intensity={1.25}
-                  beamWidth={1.2}
-                  flare={1.2}
-                  spread={1.2}
-                  spill={0.4}
-                  fog={0.04}
-                  dust={0.9}
-                  streaks={1}
-                  dots={0.6}
-                  pulse={1.1}
-                  speed={1}
-                  mouseInteraction
-                />
-                <div className="l-hero__frame" ref={heroFrame}>
+                <div className="l-hero__frame">
                   <ProductFrame />
                 </div>
               </div>
