@@ -94,14 +94,18 @@
 
 html.js .l-chapters__label {
   opacity: 0;
+  visibility: hidden;
   transform: translateX(4px);
+  pointer-events: none;
 }
 
 html.js .l-chapters__dot:hover .l-chapters__label,
 html.js .l-chapters__dot:focus-visible .l-chapters__label,
 html.js .l-chapters__dot.is-active .l-chapters__label {
   opacity: 1;
+  visibility: visible;
   transform: none;
+  pointer-events: auto;
 }
 
 .l-chapters__dot:hover,
